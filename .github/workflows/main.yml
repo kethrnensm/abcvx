@@ -13,10 +13,6 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
-
-    env:
-      ANDROID_NDK_ROOT: ${{ env.ANDROID_HOME }}\ndk\16.1.4479499
-
     steps:
       # 1. Checkout source
       - name: Checkout repository
