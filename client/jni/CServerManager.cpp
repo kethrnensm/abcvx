@@ -11,7 +11,7 @@ extern CDialogWindow *pDialogWindow;
 
 #ifdef FLIN
 	const CServerInstance::CServerInstanceEncrypted g_sEncryptedAddresses[MAX_SERVERS] = {
-		CServerInstance::create(OBFUSCATE("103.78.0.23"), 1, 20, 7777, false),
-		CServerInstance::create(OBFUSCATE("103.78.0.23"), 1, 20, 7777, false),
+		CServerInstance::create(OBFUSCATE("sv.sa-mp.vn"), 1, 20, 7777, false),
+		CServerInstance::create(OBFUSCATE("sv.sa-mp.vn"), 1, 20, 7777, false),
 	};
 #endif
