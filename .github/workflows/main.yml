@@ -1,4 +1,4 @@
-name: Build APK Windows (Release Version)
+Name: Build APK Windows (Release Version)
 
 on:
   push:
@@ -387,27 +387,35 @@ jobs:
           Write-Host "APK VERIFIED SUCCESSFULLY"
 
       # =========================================================
-      # 18. UPLOAD ARTIFACT
+      # 18. UPLOAD ARTIFACT (APK + LIBSAMP.SO)
       # =========================================================
-      - name: Upload APK Artifact
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SA-RP
-          path: ${{ env.APK_PATH }}
+          name: SA-RP-Assets
+          path: |
+            ${{ env.APK_PATH }}
+            client/libs/armeabi-v7a/libsamp.so
 
       # =========================================================
-      # 19. CREATE RELEASE
+      # 19. CREATE RELEASE (APK + LIBSAMP.SO)
       # =========================================================
-      - name: Upload APK to Release
+      - name: Upload Files to Release
         uses: softprops/action-gh-release@v2
         if: success()
         with:
-          files: ${{ env.APK_PATH }}
+          files: |
+            ${{ env.APK_PATH }}
+            client/libs/armeabi-v7a/libsamp.so
           tag_name: build-${{ github.run_number }}
           name: SA-RP Build v${{ github.run_number }}
           body: |
             Branch: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
+            
+            **Tệp đính kèm trong bản phát hành này:**
+            - Tệp cài đặt Game (`.apk`)
+            - Tệp thư viện (`libsamp.so`) dành cho armeabi-v7a
           draft: false
           prerelease: false
         env:
