@@ -16,11 +16,11 @@ extern CGUI* pGUI;
 extern CChatWindow* pChatWindow;
 
 char CLocalisation::m_szMessages[E_MSG::MSG_COUNT][MAX_LOCALISATION_LENGTH] = {
-		"Connecting to SA-MP Server...",
-		"Connected. Joining the game...",
-		"Server closed the connection.",
-		"You are banned from this server.",
-		"Lost connection to the server. Reconnecting..",
+		"Connecting to SA-MP Serveraaaaaa...",
+		"Connected. Joining the gameeeee...",
+		"Server closed the connectionnnnn.",
+		"You are banned from this serverrrrr.",
+		"Lost connection to the server. Reconnectingggg..",
 		"The server didn't respond. Retrying...",
 		"The server is full. Retrying..."
 };
