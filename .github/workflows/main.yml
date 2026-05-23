@@ -15,7 +15,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # 1. Checkout repository
+      # 1. Checkout source
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -26,7 +26,7 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      # 3. Setup Android SDK + NDK r16b
+      # 3. Setup Android SDK + NDK
       - name: Set up Android SDK & NDK
         uses: android-actions/setup-android@v3
         with:
@@ -38,14 +38,14 @@ jobs:
           cmdline-tools-version: 12266719
           accept-android-sdk-licenses: true
 
-      # 4. Enable long paths
+      # 4. Enable Windows long paths
       - name: Enable long paths
         shell: powershell
         run: |
           git config --system core.longpaths true
           reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
 
-      # 5. Show Android SDK info
+      # 5. Show SDK info
       - name: Show Android SDK info
         shell: cmd
         run: |
@@ -56,7 +56,35 @@ jobs:
           echo ===== INSTALLED NDKS =====
           dir "%ANDROID_SDK_ROOT%\ndk"
 
-      # 6. Build libsamp.so
+      # 6. Patch Application.mk
+      - name: Patch Application.mk
+        shell: powershell
+        run: |
+          @"
+          APP_ABI := armeabi-v7a
+          APP_PLATFORM := android-21
+          APP_MODULES := samp
+          APP_STL := c++_static
+          APP_CPPFLAGS := -std=c++17
+          "@ | Set-Content "client/jni/Application.mk"
+
+      # 7. Patch Android.mk
+      - name: Patch Android.mk
+        shell: powershell
+        run: |
+          $file = "client/jni/Android.mk"
+
+          $content = Get-Content $file -Raw
+
+          if ($content -notmatch "LOCAL_CPPFLAGS \+= -std=c\+\+17") {
+              $content = $content -replace "include \$\(CLEAR_VARS\)", "include `$(CLEAR_VARS)`r`nLOCAL_CPPFLAGS += -std=c++17`r`nLOCAL_LDLIBS += -latomic"
+          }
+
+          Set-Content $file $content
+
+          Write-Host "Android.mk patched successfully"
+
+      # 8. Build libsamp.so
       - name: Build libsamp.so
         shell: cmd
         run: |
@@ -72,16 +100,8 @@ jobs:
           )
 
           echo.
-          echo ===== ROOT FILES =====
-          dir
-
-          if not exist "client\jni" (
-            echo ERROR: client\jni folder not found
-            exit /b 1
-          )
-
-          echo.
           echo ===== ENTER JNI FOLDER =====
+
           cd client\jni
 
           echo.
@@ -97,15 +117,21 @@ jobs:
             exit /b 1
           )
 
+          if not exist "Application.mk" (
+            echo ERROR: Application.mk not found
+            exit /b 1
+          )
+
           echo.
           echo ===== START NDK BUILD =====
 
           call "%NDK_PATH%\ndk-build.cmd" ^
             NDK_PROJECT_PATH=. ^
+            NDK_APPLICATION_MK=Application.mk ^
             APP_BUILD_SCRIPT=Android.mk ^
             APP_ABI=armeabi-v7a
 
-      # 7. Verify native library
+      # 9. Verify libsamp.so
       - name: Verify libsamp.so
         shell: cmd
         run: |
@@ -120,7 +146,7 @@ jobs:
             exit /b 1
           )
 
-      # 8. Copy libsamp.so to jniLibs
+      # 10. Copy libsamp.so to jniLibs
       - name: Copy libsamp.so
         shell: powershell
         run: |
@@ -138,7 +164,7 @@ jobs:
               exit 1
           }
 
-      # 9. Verify copied library
+      # 11. Verify copied library
       - name: Verify copied library
         shell: cmd
         run: |
@@ -146,7 +172,7 @@ jobs:
           echo ===== JNI LIBS =====
           dir "app\src\main\jniLibs\armeabi-v7a"
 
-      # 10. Verify Gradle
+      # 12. Verify Gradle
       - name: Verify Gradle
         shell: cmd
         run: |
@@ -157,13 +183,13 @@ jobs:
             exit /b 1
           )
 
-      # 11. Build APK
+      # 13. Build APK
       - name: Build Debug APK
         shell: cmd
         run: |
           call gradlew.bat assembleDebug --stacktrace
 
-      # 12. Verify APK
+      # 14. Verify APK
       - name: Verify APK
         shell: cmd
         run: |
@@ -178,14 +204,14 @@ jobs:
             exit /b 1
           )
 
-      # 13. Upload APK Artifact
+      # 15. Upload APK Artifact
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
 
-      # 14. Upload APK to GitHub Release
+      # 16. Upload APK to GitHub Release
       - name: Upload APK to Release
         uses: softprops/action-gh-release@v2
         if: success()
