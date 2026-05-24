@@ -962,102 +962,117 @@ private CefClientManager mClientManager = null;
         return mSurfaceView;
     }
 
-    protected boolean systemInit()
+	protected boolean systemInit()
+{
+    final NvEventQueueActivity act = this;
+
+    System.out.println("ln systemInit");
+
+    setContentView(R.layout.main_render_screen);
+
+    SurfaceView view = findViewById(R.id.main_sv);
+    mSurfaceView = view;
+
+    mRootFrame = findViewById(R.id.main_fl_root);
+    mAndroidUI = findViewById(R.id.ui_layout);
+
+    SurfaceHolder holder = view.getHolder();
+    holder.setType(SurfaceHolder.SURFACE_TYPE_GPU);
+    holder.setKeepScreenOn(true);
+
+    view.setFocusable(true);
+    view.setFocusableInTouchMode(true);
+
+    mRootFrame.setOnTouchListener(this);
+
+    mInputManager = new InputManager(this);
+    mHeightProvider = new HeightProvider(this).init(mRootFrame).setHeightListener(this);
+    mDialog = new Dialog(this);
+    mSpeedometer = new Speedometer(this);
+    mDonate = new Donate(this);
+    mTab = new Tab(this);
+    mWelcome = new Welcome(this);
+    mHudManager = new HudManager(this);
+    mTwitter = new Twitter(this, getActivityResultRegistry());
+
+    // =========================
+    // CEF INIT
+    // =========================
+    if (mRootFrame != null)
     {
-        final NvEventQueueActivity act = this;
+        mJavaManager = new CefJavaManager(mRootFrame, this);
+        mClientManager = new CefClientManager(this);
 
-		System.out.println("ln systemInit");
+        mJavaManager.setClientManager(mClientManager);
+        mClientManager.setJavaManager(mJavaManager);
+    }
+    else
+    {
+        System.out.println("CEF init failed: mRootFrame is null");
+    }
 
-        setContentView(R.layout.main_render_screen);
+    DoResumeEvent();
 
-        SurfaceView view = findViewById(R.id.main_sv);
-		mJavaManager = new CefJavaManager(mRootFrame, getInstance());
-		mClientManager = new CefClientManager(getInstance());
-		mJavaManager.setClientManager(mClientManager);
-		mClientManager.setJavaManager(mJavaManager);
-        mSurfaceView = view;
-        mRootFrame = findViewById(R.id.main_fl_root);
-        mAndroidUI = findViewById(R.id.ui_layout);
-
-        SurfaceHolder holder = view.getHolder();
-        holder.setType(SurfaceHolder.SURFACE_TYPE_GPU);
-        holder.setKeepScreenOn(true);
-
-        view.setFocusable(true);
-        view.setFocusableInTouchMode(true);
-
-        mRootFrame.setOnTouchListener(this);
-
-        mInputManager = new InputManager(this);
-        mHeightProvider = new HeightProvider(this).init(mRootFrame).setHeightListener(this);
-        mDialog = new Dialog(this);
-        mSpeedometer = new Speedometer(this);
-        mDonate = new Donate(this);
-        mTab = new Tab(this);
-        
-        mWelcome = new Welcome(this);
-        
-        mHudManager = new HudManager(this);
-        mTwitter = new Twitter(this, getActivityResultRegistry());
-        DoResumeEvent();
-
-        holder.addCallback(new Callback()
+    holder.addCallback(new Callback()
+    {
+        public void surfaceCreated(SurfaceHolder holder)
         {
-            // @Override
-            public void surfaceCreated(SurfaceHolder holder)
+            System.out.println("systemInit.surfaceCreated");
+            @SuppressWarnings("unused")
+            boolean firstRun = cachedSurfaceHolder == null;
+            cachedSurfaceHolder = holder;
+
+            if (fixedWidth != 0 && fixedHeight != 0)
             {
-                System.out.println("systemInit.surfaceCreated");
-                @SuppressWarnings("unused")
-                boolean firstRun = cachedSurfaceHolder == null;
-                cachedSurfaceHolder = holder;
-
-                if (fixedWidth!=0 && fixedHeight!=0)
-                {
-                    System.out.println("Setting fixed window size");
-                    holder.setFixedSize(fixedWidth, fixedHeight);
-                }
-
-                ranInit = true;
-                if(!supportPauseResume && !init(true))
-                {
-                    handler.post(new Runnable()
-                                 {
-                                     public void run()
-                                     {
-                                         new AlertDialog.Builder(act)
-                                                 .setMessage("Application initialization failed. The application will exit.")
-                                                 .setPositiveButton("Ok",
-                                                         new DialogInterface.OnClickListener ()
-                                                         {
-                                                             public void onClick(DialogInterface i, int a)
-                                                             {
-                                                                 finish();
-                                                             }
-                                                         }
-                                                 )
-                                                 .setCancelable(false)
-                                                 .show();
-                                     }
-                                 }
-                    );
-                }
-
-                if (!firstRun && ResumeEventDone)
-                {
-                    System.out.println("entering resumeEvent");
-                    resumeEvent();
-                    System.out.println("returned from resumeEvent");
-                }
-                setWindowSize(surfaceWidth, surfaceHeight);
+                System.out.println("Setting fixed window size");
+                holder.setFixedSize(fixedWidth, fixedHeight);
             }
 
-            /**
-             * Implementation function: defined in libnvevent.a
-             * The application does not and should not overide this; nv_event handles this internally
-             * And remaps as needed into the native calls exposed by nv_event.h
-             */
-            // @Override
-            public void surfaceChanged(SurfaceHolder holder, int format,
+            ranInit = true;
+            if (!supportPauseResume && !init(true))
+            {
+                handler.post(new Runnable()
+                {
+                    public void run()
+                    {
+                        new AlertDialog.Builder(act)
+                                .setMessage("Application initialization failed. The application will exit.")
+                                .setPositiveButton("Ok",
+                                        new DialogInterface.OnClickListener()
+                                        {
+                                            public void onClick(DialogInterface i, int a)
+                                            {
+                                                finish();
+                                            }
+                                        }
+                                )
+                                .setCancelable(false)
+                                .show();
+                    }
+                });
+            }
+
+            if (!firstRun && ResumeEventDone)
+            {
+                System.out.println("entering resumeEvent");
+                resumeEvent();
+                System.out.println("returned from resumeEvent");
+            }
+
+            setWindowSize(surfaceWidth, surfaceHeight);
+        }
+        public void surfaceDestroyed(SurfaceHolder holder)
+        {
+            System.out.println("systemInit.surfaceDestroyed");
+            viewIsActive = false;
+            pauseEvent();
+            destroyEGLSurface();
+        }
+    });
+
+    return true;
+}
+    public void surfaceChanged(SurfaceHolder holder, int format,
                                        int width, int height)
             {
                 System.out.println("Surface changed: " + width + ", " + height);
