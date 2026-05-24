@@ -15,7 +15,7 @@
 
 #include "gui/gui.h"
 #include "gui/CFontRenderer.h"
-
+#include "vendor/cef/SAMPMobileCef.h"
 #include "chatwindow.h"
 #include "playertags.h"
 #include "dialog.h"
@@ -145,6 +145,7 @@ void InitSAMP(JNIEnv* pEnv, jobject thiz)
 	InitBASSFuncs();
 
 	g_pszStorage = "/storage/emulated/0/Android/SAMPGAMES/";
+	cef::setGamePath(g_pszStorage);
 	
 	if(!g_pszStorage)
 	{
