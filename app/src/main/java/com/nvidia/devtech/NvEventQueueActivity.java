@@ -61,6 +61,8 @@ import com.samp.online.core.DialogClientSettings;
 import com.samp.online.gui.HudManager;
 import com.samp.online.gui.tab.Tab;
 import com.samp.online.gui.Welcome;
+import com.samp.mobile.cef.CefJavaManager;
+import com.samp.mobile.cef.CefClientManager;
 import com.samp.online.gui.twitter.Twitter;
 
 import org.json.JSONException;
