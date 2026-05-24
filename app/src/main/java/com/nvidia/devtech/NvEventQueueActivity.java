@@ -204,6 +204,8 @@ private Runnable hideNotificationRunnable = null;
     public native void sendButtonQuick(int type, byte[] str, int action);
     public native void sendCommand(byte[] str);
     public native void sendDonateClick(int id);
+	private CefJavaManager mJavaManager = null;
+private CefClientManager mClientManager = null;
     public String getHudElementColor(int id)
     {
         byte[] color = getNativeHudElementColor(id);
@@ -967,7 +969,10 @@ private Runnable hideNotificationRunnable = null;
         setContentView(R.layout.main_render_screen);
 
         SurfaceView view = findViewById(R.id.main_sv);
-
+		mJavaManager = new CefJavaManager(mRootFrame, getInstance());
+		mClientManager = new CefClientManager(getInstance());
+		mJavaManager.setClientManager(mClientManager);
+		mClientManager.setJavaManager(mJavaManager);
         mSurfaceView = view;
         mRootFrame = findViewById(R.id.main_fl_root);
         mAndroidUI = findViewById(R.id.ui_layout);
