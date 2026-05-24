@@ -1072,22 +1072,6 @@ private CefClientManager mClientManager = null;
 
     return true;
 }
-            /**
-             * Implementation function: defined in libnvevent.a
-             * The application does not and should not overide this; nv_event handles this internally
-             * And remaps as needed into the native calls exposed by nv_event.h
-             */
-            // @Override
-            public void surfaceDestroyed(SurfaceHolder holder)
-            {
-                System.out.println("systemInit.surfaceDestroyed");
-                viewIsActive = false;
-                pauseEvent();
-                destroyEGLSurface();
-            }
-        });
-        return true;
-    }
 
 
     /** The number of bits requested for the red component */
