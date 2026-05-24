@@ -11,7 +11,7 @@ extern CGUI* pGUI;
 
 CKeyBoard::CKeyBoard()
 {
-	Log("Initalizing KeyBoard..");
+	Log(OBFUSCATE("Initalizing KeyBoard.."));
 
 	ImGuiIO& io = ImGui::GetIO();
 	m_Size = ImVec2(io.DisplaySize.x, io.DisplaySize.y * 0.55);
@@ -20,8 +20,8 @@ CKeyBoard::CKeyBoard()
 	m_fKeySizeY = m_Size.y / 5;
 
 
-	Log("Size: %f, %f. Pos: %f, %f", m_Size.x, m_Size.y, m_Pos.x, m_Pos.y);
-	Log("font size: %f. Key's height: %f", m_fFontSize, m_fKeySizeY);
+	Log(OBFUSCATE("Size: %f, %f. Pos: %f, %f"), m_Size.x, m_Size.y, m_Pos.x, m_Pos.y);
+	Log(OBFUSCATE("font size: %f. Key's height: %f"), m_fFontSize, m_fKeySizeY);
 
 	m_bEnable = false;
 	m_iLayout = LAYOUT_ENG;
@@ -34,12 +34,11 @@ CKeyBoard::CKeyBoard()
 	m_pkHistory = new CKeyBoardHistory();
 
 	InitENG();
-	InitRU();
 	InitNUM();
 
 	m_bNewKeyboard = true;
 
-	Log("KeyBoard inited");
+	Log(OBFUSCATE("KeyBoard inited"));
 }
 
 CKeyBoard::~CKeyBoard()
@@ -51,26 +50,6 @@ void CKeyBoard::Render()
 	if (!m_bEnable || m_bNewKeyboard) return;
 
 	ImGuiIO& io = ImGui::GetIO();
-	ImVec2 vecButSize = ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 2.5);
-	ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - vecButSize.x, io.DisplaySize.y / 2 - vecButSize.y * 3));
-	ImGui::Begin("###keyboard", nullptr,
-		ImGuiWindowFlags_NoTitleBar |
-		ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoScrollbar |
-		ImGuiWindowFlags_NoSavedSettings |
-		ImGuiWindowFlags_AlwaysAutoResize);
-
-	if (ImGui::Button("UP", vecButSize))
-	{
-		m_pkHistory->PageUp();
-	}
-
-	if (ImGui::Button("DOWN", vecButSize))
-	{
-		m_pkHistory->PageDown();
-	}
-
-	ImGui::End();
 
 	// background
 	ImGui::GetOverlayDrawList()->AddRectFilled(m_Pos, ImVec2(m_Size.x, io.DisplaySize.y), 0xB0000000);
@@ -174,8 +153,6 @@ void CKeyBoard::Open(keyboard_callback* handler, bool bHiden)
 	m_pHandler = handler;
 	m_bEnable = true;
 	m_bInputFlag = bHiden;
-	
-	g_pJavaWrapper->HideHudFeatures();
 
 	if (m_bNewKeyboard)
 	{
@@ -196,8 +173,6 @@ void CKeyBoard::Close()
 	m_iCase = LOWER_CASE;
 	m_iPushedKey = -1;
 	m_pHandler = nullptr;
-	
-	g_pJavaWrapper->ShowHudFeatures();
 
 	if (m_bNewKeyboard)
 	{
@@ -206,8 +181,6 @@ void CKeyBoard::Close()
 			g_pJavaWrapper->HideInputLayout();
 		}
 	}
-
-	return;
 }
 #include "util/CJavaWrapper.h"
 bool CKeyBoard::OnTouchEvent(int type, bool multi, int x, int y)
@@ -219,18 +192,35 @@ bool CKeyBoard::OnTouchEvent(int type, bool multi, int x, int y)
 	ImGuiIO& io = ImGui::GetIO();
 
 	if (x >= io.DisplaySize.x - ImGui::GetFontSize() * 4 && y >= io.DisplaySize.y / 2 - (ImGui::GetFontSize() * 2.5) * 3 && y <= io.DisplaySize.y / 2) // keys
-	{
 		return true;
-	}
-
 
 	if (pScrollbar)
 	{
 		if (!pScrollbar->OnTouchEvent(type, multi, x, y))
-		{
 			return false;
-		}
 	}
+
+	if (g_pWidgetManager)
+	{
+		CWidget* pWidget = g_pWidgetManager->GetWidget(WIDGET_CHATHISTORY_DOWN);
+		if (pWidget)
+		{
+			if (pWidget->GetState() == 2)
+			{
+				m_pkHistory->PageDown();
+				return false;
+			}
+		}
+		pWidget = g_pWidgetManager->GetWidget(WIDGET_CHATHISTORY_UP);
+		if (pWidget)
+		{
+			if (pWidget->GetState() == 2)
+			{
+				m_pkHistory->PageUp();
+				return false;
+			}
+		}
+	}	
 
 	static bool bWannaCopy = false;
 	static uint32_t uiTouchTick = 0;
@@ -246,9 +236,8 @@ bool CKeyBoard::OnTouchEvent(int type, bool multi, int x, int y)
 			{
 				std::string msg = g_pJavaWrapper->GetClipboardString();
 				for (int i = 0; i < msg.size(); i++)
-				{
 					AddCharToInput((char)msg[i]);
-				}
+
 				bWannaCopy = false;
 			}
 			else
@@ -265,21 +254,18 @@ bool CKeyBoard::OnTouchEvent(int type, bool multi, int x, int y)
 				bWannaCopy = true;
 				uiTouchTick = GetTickCount();
 			}
-			else
-			{
-				bWannaCopy = false;
-			}
+			else bWannaCopy = false;
 		}
 	}
 
 	if (type == TOUCH_PUSH && y < m_Pos.y)
-	{
 		bWannaClose = true;
-	}
+
 	if (type == TOUCH_POP && y < m_Pos.y && bWannaClose)
 	{
 		bWannaClose = false;
 		Close();
+
 		return false;
 	}
 
@@ -303,6 +289,7 @@ bool CKeyBoard::OnTouchEvent(int type, bool multi, int x, int y)
 		HandleInput(*key);
 		break;
 	}
+
 	delete key;
 	return false;
 }
@@ -318,10 +305,10 @@ void CKeyBoard::HandleInput(kbKey& key)
 
 	case KEY_SWITCH:
 		m_iLayout++;
-		if (m_iLayout >= 3) m_iLayout = 0;
+		if (m_iLayout >= 2) m_iLayout = 0; // ❗ đổi từ 3 -> 2
 		m_iCase = LOWER_CASE;
 		break;
-
+	
 	case KEY_BACKSPACE:
 		DeleteCharFromInput();
 		break;
@@ -336,21 +323,16 @@ void CKeyBoard::HandleInput(kbKey& key)
 	}
 }
 
-void CKeyBoard::AddCharToInput(uint16_t sym)
+void CKeyBoard::AddCharToInput(char sym)
 {
 	if (m_sInput.length() < MAX_INPUT_LEN && sym)
 	{
-		// Nếu bạn vẫn đang dùng cp1251 byte-based string thì cần ép về byte
-		// để giữ đúng logic cũ của project.
-		m_sInput.push_back((char)(sym & 0xFF));
-
+		m_sInput.push_back(sym);
 		cp1251_to_utf8(m_utf8Input, &m_sInput.c_str()[m_iInputOffset]);
 
 	check:
-		ImVec2 textSize = pGUI->GetFont()->CalcTextSizeA(
-			m_fFontSize, FLT_MAX, 0.0f, m_utf8Input, nullptr, nullptr);
-
-		if (textSize.x >= (m_Size.x - (m_Size.x * 0.04f)))
+		ImVec2 textSize = pGUI->GetFont()->CalcTextSizeA(m_fFontSize, FLT_MAX, 0.0f, m_utf8Input, nullptr, nullptr);
+		if (textSize.x >= (m_Size.x - (m_Size.x * 0.04)))
 		{
 			m_iInputOffset++;
 			cp1251_to_utf8(m_utf8Input, &m_sInput.c_str()[m_iInputOffset]);
@@ -391,7 +373,7 @@ void CKeyBoard::Send()
 		m_pHandler(m_sInput.c_str());
 		if (m_pkHistory && !IsHidden()) m_pkHistory->AddStringToHistory(m_sInput);
 	}
-	Close();
+	m_bEnable = false;
 }
 
 kbKey* CKeyBoard::GetKeyFromPos(int x, int y)
@@ -912,153 +894,6 @@ void CKeyBoard::InitENG()
 	//curPos.x += key.width;
 
 	return;
-}
-
-void CKeyBoard::InitRU()
-{
-	Log(__FUNCTION__);
-
-	struct KeyDef
-	{
-		uint8_t lower;
-		uint8_t upper;
-		const char* lowerText;
-		const char* upperText;
-	};
-
-	auto addKey = [&](std::vector<kbKey>* row, float& x, float y, float width,
-		uint8_t lower, uint8_t upper,
-		const char* lowerText, const char* upperText,
-		int type = KEY_DEFAULT)
-	{
-		kbKey key{};
-		key.pos = ImVec2(x, y);
-		key.symPos = ImVec2(x + width * 0.4f, y + m_fKeySizeY * 0.2f);
-		key.width = width;
-		key.code[LOWER_CASE] = (char)lower;
-		key.code[UPPER_CASE] = (char)upper;
-		key.type = type;
-		key.id = (int)row->size();
-
-		if (lowerText && lowerText[0] != '\0')
-			cp1251_to_utf8(key.name[LOWER_CASE], lowerText);
-		else
-			key.name[LOWER_CASE][0] = '\0';
-
-		if (upperText && upperText[0] != '\0')
-			cp1251_to_utf8(key.name[UPPER_CASE], upperText);
-		else
-			key.name[UPPER_CASE][0] = '\0';
-
-		row->push_back(key);
-		x += width;
-	};
-
-	const float defWidthRow1 = m_Size.x / 11.0f;
-	const float defWidthRow2 = m_Size.x / 11.0f;
-	const float defWidthRow3 = m_Size.x / 11.0f;
-	const float defWidthRow4 = m_Size.x / 10.0f;
-
-	// Row 0
-	{
-		std::vector<kbKey>* row = &m_Rows[LAYOUT_RUS][0];
-		row->clear();
-
-		float x = 0.0f;
-		float y = m_Pos.y + m_fKeySizeY;
-
-		const KeyDef keys[] = {
-			{0xE9, 0xC9, "\xE9", "\xC9"}, // й/Й
-			{0xF6, 0xD6, "\xF6", "\xD6"}, // ц/Ц
-			{0xF3, 0xD3, "\xF3", "\xD3"}, // у/У
-			{0xEA, 0xCA, "\xEA", "\xCA"}, // к/К
-			{0xE5, 0xC5, "\xE5", "\xC5"}, // е/Е
-			{0xED, 0xCD, "\xED", "\xCD"}, // н/Н
-			{0xE3, 0xC3, "\xE3", "\xC3"}, // г/Г
-			{0xF8, 0xD8, "\xF8", "\xD8"}, // ш/Ш
-			{0xF9, 0xD9, "\xF9", "\xD9"}, // щ/Щ
-			{0xE7, 0xC7, "\xE7", "\xC7"}, // з/З
-			{0xF5, 0xD5, "\xF5", "\xD5"}, // х/Х
-		};
-
-		for (const auto& k : keys)
-			addKey(row, x, y, defWidthRow1, k.lower, k.upper, k.lowerText, k.upperText);
-
-		addKey(row, x, y, defWidthRow1, 0xFA, 0xDA, "\xFA", "\xDA"); // ъ/Ъ
-	}
-
-	// Row 1
-	{
-		std::vector<kbKey>* row = &m_Rows[LAYOUT_RUS][1];
-		row->clear();
-
-		float x = 0.0f;
-		float y = m_Pos.y + m_fKeySizeY * 2.0f;
-
-		const KeyDef keys[] = {
-			{0xF4, 0xD4, "\xF4", "\xD4"}, // ф/Ф
-			{0xFB, 0xDB, "\xFB", "\xDB"}, // ы/Ы
-			{0xE2, 0xC2, "\xE2", "\xC2"}, // в/В
-			{0xE0, 0xC0, "\xE0", "\xC0"}, // а/А
-			{0xEF, 0xCF, "\xEF", "\xCF"}, // п/П
-			{0xF0, 0xD0, "\xF0", "\xD0"}, // р/Р
-			{0xEE, 0xCE, "\xEE", "\xCE"}, // о/О
-			{0xEB, 0xCB, "\xEB", "\xCB"}, // л/Л
-			{0xE4, 0xC4, "\xE4", "\xC4"}, // д/Д
-			{0xE6, 0xC6, "\xE6", "\xC6"}, // ж/Ж
-			{0xFD, 0xDD, "\xFD", "\xDD"}, // э/Э
-		};
-
-		for (const auto& k : keys)
-			addKey(row, x, y, defWidthRow2, k.lower, k.upper, k.lowerText, k.upperText);
-
-		addKey(row, x, y, defWidthRow2, 0, 0, "", "", KEY_BACKSPACE);
-	}
-
-	// Row 2
-	{
-		std::vector<kbKey>* row = &m_Rows[LAYOUT_RUS][2];
-		row->clear();
-
-		float x = 0.0f;
-		float y = m_Pos.y + m_fKeySizeY * 3.0f;
-
-		addKey(row, x, y, defWidthRow3 * 1.5f, 0, 0, "", "", KEY_SHIFT);
-
-		const KeyDef keys[] = {
-			{0xFF, 0xDF, "\xFF", "\xDF"}, // я/Я
-			{0xF7, 0xD7, "\xF7", "\xD7"}, // ч/Ч
-			{0xF1, 0xD1, "\xF1", "\xD1"}, // с/С
-			{0xEC, 0xCC, "\xEC", "\xCC"}, // м/М
-			{0xE8, 0xC8, "\xE8", "\xC8"}, // и/И
-			{0xF2, 0xD2, "\xF2", "\xD2"}, // т/Т
-			{0xFC, 0xDC, "\xFC", "\xDC"}, // ь/Ь
-			{0xE1, 0xC1, "\xE1", "\xC1"}, // б/Б
-			{0xFE, 0xDE, "\xFE", "\xDE"}, // ю/Ю
-		};
-
-		for (const auto& k : keys)
-			addKey(row, x, y, defWidthRow3, k.lower, k.upper, k.lowerText, k.upperText);
-
-		addKey(row, x, y, defWidthRow3, 0, 0, "", "", KEY_BACKSPACE);
-	}
-
-	// Row 3
-	{
-		std::vector<kbKey>* row = &m_Rows[LAYOUT_RUS][3];
-		row->clear();
-
-		float x = 0.0f;
-		float y = m_Pos.y + m_fKeySizeY * 4.0f;
-
-		addKey(row, x, y, defWidthRow4, '/', '/', "/", "/");
-		addKey(row, x, y, defWidthRow4, ',', ',', ",", ",");
-		addKey(row, x, y, defWidthRow4, 0, 0, "", "", KEY_SWITCH);
-		addKey(row, x, y, defWidthRow4 * 4.0f, ' ', ' ', "", "", KEY_SPACE);
-		addKey(row, x, y, defWidthRow4, '?', '?', "?", "?");
-		addKey(row, x, y, defWidthRow4, '!', '!', "!", "!");
-		addKey(row, x, y, defWidthRow4, 0, 0, "", "", KEY_SEND);
-	}
 }
 
 void CKeyBoard::InitNUM()
@@ -1613,9 +1448,8 @@ void CKeyBoard::ProcessInputCommands()
 	while (pStr = bufferedStrings.ReadLock())
 	{
 		if (m_pHandler)
-		{
 			m_pHandler(pStr->c_str());
-		}
+
 		Close();
 
 		bufferedStrings.ReadUnlock();
@@ -1625,15 +1459,15 @@ void CKeyBoard::ProcessInputCommands()
 void CKeyBoard::OnNewKeyboardInput(JNIEnv* pEnv, jobject thiz, jbyteArray str)
 {
 	if (!str)
-	{
 		return;
-	}
+
 	jboolean isCopy = true;
 
 	jbyte* pMsg = pEnv->GetByteArrayElements(str, &isCopy);
 	jsize length = pEnv->GetArrayLength(str);
 
-	std::string szStr((char*)pMsg, length);
+
+	std::string szStr(reinterpret_cast<const char*>(pMsg), length);
 
 	std::string* toWrite = bufferedStrings.WriteLock();
 
