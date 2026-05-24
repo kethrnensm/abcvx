@@ -43,12 +43,12 @@ jobs:
           git config --system core.longpaths true
           reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
 
-      # --- BƯỚC MỚI: XÓA SẠCH MỌI FILE CŨ TRƯỚC KHI BUILD ---
+      # 1. XÓA SẠCH FILE CŨ (Tránh việc Gradle dùng nhầm file cũ)
       - name: Purge Old Library
-        shell: cmd
+        shell: powershell
         run: |
-          if exist "app\src\main\jniLibs\armeabi-v7a\libsamp.so" del /f /q "app\src\main\jniLibs\armeabi-v7a\libsamp.so"
-          if exist "client\libs\armeabi-v7a\libsamp.so" del /f /q "client\libs\armeabi-v7a\libsamp.so"
+          Get-ChildItem -Path "app/src/main/jniLibs" -Filter "libsamp.so" -Recurse | Remove-Item -Force
+          Get-ChildItem -Path "client" -Filter "libsamp.so" -Recurse | Remove-Item -Force
 
       - name: Patch Application.mk
         shell: powershell
@@ -72,7 +72,7 @@ jobs:
           }
           Set-Content $file $content
 
-      # BUILD MỚI
+      # 2. BUILD C++
       - name: Build libsamp.so
         shell: cmd
         run: |
@@ -85,19 +85,27 @@ jobs:
             APP_ABI=armeabi-v7a
           if errorlevel 1 exit /b 1
 
-      # --- BƯỚC QUAN TRỌNG: COPY FILE VÀO NƠI ANDROID SẼ ĐỌC ---
+      # 3. TỰ TÌM VÀ COPY FILE (DÙ NÓ NẰM Ở ĐÂU)
       - name: Deploy Library to Android
-        shell: cmd
+        shell: powershell
         run: |
-          if not exist "app\src\main\jniLibs\armeabi-v7a" mkdir "app\src\main\jniLibs\armeabi-v7a"
-          copy /y "client\libs\armeabi-v7a\libsamp.so" "app\src\main\jniLibs\armeabi-v7a\libsamp.so"
-          if not exist "app\src\main\jniLibs\armeabi-v7a\libsamp.so" (echo "ERROR: Copy failed" & exit /b 1)
+          $sourceFile = Get-ChildItem -Path "client" -Filter "libsamp.so" -Recurse | Select-Object -First 1
+          if ($sourceFile) {
+              Write-Host "Tìm thấy file tại: $($sourceFile.FullName)"
+              $destDir = "app/src/main/jniLibs/armeabi-v7a"
+              if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
+              Copy-Item -Path $sourceFile.FullName -Destination "$destDir/libsamp.so" -Force
+              Write-Host "Copy thành công!"
+          } else {
+              Write-Error "KHÔNG TÌM THẤY libsamp.so TRONG THƯ MỤC CLIENT! Lỗi build C++ rồi."
+              exit 1
+          }
 
       - name: Clean Project
         shell: cmd
         run: call gradlew.bat clean
 
-      - name: Build Debug APK
+      - name: Build APK
         shell: cmd
         run: |
           call gradlew.bat assembleDebug --stacktrace
@@ -122,7 +130,7 @@ jobs:
           files: ${{ env.APK_PATH }}
           tag_name: build-${{ github.run_number }}
           name: SA-RP Build v${{ github.run_number }}
-          body: "Build thành công với lib mới nhất."
+          body: "Build hoàn tất, file libsamp.so đã được cập nhật."
           draft: false
           prerelease: false
         env:
