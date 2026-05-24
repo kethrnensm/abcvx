@@ -1,4 +1,4 @@
-Name: Build APK Windows (Release Version)
+name: Build APK Windows (Release Version)
 
 on:
   push:
