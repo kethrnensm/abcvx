@@ -1,5 +1,9 @@
 LOCAL_PATH := $(call my-dir)
 
+# =========================
+# PREBUILT LIBS
+# =========================
+
 include $(CLEAR_VARS)
 LOCAL_MODULE := libopus
 LOCAL_SRC_FILES := libraries/libopus.a
@@ -10,14 +14,19 @@ LOCAL_MODULE := libspeex
 LOCAL_SRC_FILES := libraries/libspeex.a
 include $(PREBUILT_STATIC_LIBRARY)
 
-include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
-LOCAL_MODULE    := libSAMPMobileCef 
+LOCAL_MODULE := libSAMPMobileCef
 LOCAL_SRC_FILES := vendor/cef/libSAMPMobileCef.a
+include $(PREBUILT_STATIC_LIBRARY)
 
-LOCAL_STATIC_LIBRARIES := libSAMPMobileCef
+# =========================
+# MAIN LIBRARY
+# =========================
+
 include $(CLEAR_VARS)
+
 LOCAL_MODULE := samp
+
 LOCAL_LDLIBS := -lm -llog -lc -lz -ljnigraphics -landroid -lEGL -lGLESv2 -lOpenSLES
 
 LOCAL_C_INCLUDES += $(wildcard $(LOCAL_PATH)/vendor/)
@@ -54,7 +63,10 @@ FILE_LIST += $(wildcard $(LOCAL_PATH)/vendor/hash/bcrypt/*.cpp)
 FILE_LIST += $(wildcard $(LOCAL_PATH)/vendor/hash/bcrypt/crypt_blowfish/*.cpp)
 
 LOCAL_SRC_FILES := $(FILE_LIST:$(LOCAL_PATH)/%=%)
-LOCAL_STATIC_LIBRARIES := libopus libspeex
-#LOCAL_CPPFLAGS := -w -s -pthread -Wall -fpack-struct=1 -O2 -std=c++14 -fexceptions
+
+# LINK STATIC LIBRARIES
+LOCAL_STATIC_LIBRARIES := libopus libspeex libSAMPMobileCef
+
 LOCAL_CPPFLAGS := -w -s -fvisibility=hidden -pthread -Wall -fpack-struct=1 -O2 -std=c++14 -fexceptions -ferror-limit=5
+
 include $(BUILD_SHARED_LIBRARY)
