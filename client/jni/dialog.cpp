@@ -24,7 +24,10 @@ char utf8DialogInputBuffer[100 * 3];
 static float GetKeyboardOffset()
 {
 	if (pKeyBoard && pKeyBoard->IsOpen() && pGUI)
-		return pGUI->ScaleY(320.0f);
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		return io.DisplaySize.y * 0.55f; // Đã sửa: Đồng bộ 55% chiều cao màn hình với CKeyBoard
+	}
 
 	return 0.0f;
 }
@@ -650,8 +653,6 @@ void CDialogWindow::RenderTabList(int dStyle)
 		}
 	}
 
-	// Nếu bạn vẫn muốn ép lại vị trí mỗi frame, để ở đây, nhưng đã có SetNextWindowPos trước Begin rồi.
-	// Mình để lại comment cho khỏi ai đó lỡ tay cắt rồi lại quay về cảnh bàn phím nuốt dialog.
 	ImVec2 winSizeFinal = ImGui::GetWindowSize();
 	float keyboardOffsetFinal = GetKeyboardOffset();
 	float posXFinal = ((io.DisplaySize.x - winSizeFinal.x) / 2.0f);
@@ -675,7 +676,9 @@ void CDialogWindow::Render()
 		return RenderTabList(m_byteDialogStyle);
 
 	ImGui::SetNextWindowSize(ImVec2(0, 0));
-	ImGui::SetNextWindowPosCenter();
+	
+	// Đã sửa: Xóa/Comment dòng ImGui::SetNextWindowPosCenter() để phần tính toán SetWindowPos bên dưới hoạt động
+	// ImGui::SetNextWindowPosCenter();
 
 	ImGui::Begin(" ", nullptr,
 		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
