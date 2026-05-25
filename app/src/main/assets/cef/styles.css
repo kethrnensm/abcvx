@@ -1,24 +1,313 @@
-/* ================= BỔ SUNG: HỆ THỐNG TRANG BỊ NHÂN VẬT ================= */
+/* ================= GLOBAL ================= */
 
-/* Container chính chia 2 cột: Trái (Hành trang) - Phải (Trang bị) */
+body {
+    font-family: Arial, sans-serif;
+    background-color: transparent;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ================= ALERT ================= */
+
+#alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.alert-box {
+    background-color: white;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.alert-content {
+    padding: 20px;
+}
+
+.alert-icon {
+    font-size: 40px;
+    color: #609ad4;
+    margin-bottom: 10px;
+}
+
+.alert-title {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.alert-message {
+    margin-bottom: 20px;
+    word-break: break-word;
+}
+
+.alert-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    margin: 5px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.alert-buttons button:hover {
+    transform: scale(1.05);
+}
+
+.okay-button {
+    background-color: #609ad4;
+    color: white;
+}
+
+.cancel-button {
+    background-color: #f08080;
+    color: white;
+}
+
+/* ================= TOAST NOTIFICATION ================= */
+
+#toast-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.toast {
+    position: relative;
+    min-width: 220px;
+    max-width: 320px;
+    background: rgba(25, 25, 35, 0.96);
+    color: white;
+    border-radius: 10px;
+    padding: 12px 14px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    transform: translateX(-320px);
+    opacity: 0;
+    animation: toastSlideIn 0.4s forwards;
+    pointer-events: auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.toast.hide {
+    animation: toastSlideOut 0.4s forwards;
+}
+
+.toast-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.toast-content {
+    flex: 1;
+}
+
+.toast-title {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+.toast-message {
+    font-size: 12px;
+    opacity: 0.9;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.toast.success {
+    border-left: 4px solid #00ff88;
+}
+.toast.success .toast-icon {
+    background: rgba(0, 255, 136, 0.15);
+    color: #00ff88;
+}
+
+.toast.error {
+    border-left: 4px solid #ff4d4d;
+}
+.toast.error .toast-icon {
+    background: rgba(255, 77, 77, 0.15);
+    color: #ff4d4d;
+}
+
+.toast.warning {
+    border-left: 4px solid #ffd32a;
+}
+.toast.warning .toast-icon {
+    background: rgba(255, 211, 42, 0.15);
+    color: #ffd32a;
+}
+
+.toast.info {
+    border-left: 4px solid #3ea6ff;
+}
+.toast.info .toast-icon {
+    background: rgba(62, 166, 255, 0.15);
+    color: #3ea6ff;
+}
+
+.toast-progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.toast-progress::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    animation: toastTimer 5s linear forwards;
+}
+
+.toast.success .toast-progress::after {
+    background: #00ff88;
+}
+.toast.error .toast-progress::after {
+    background: #ff4d4d;
+}
+.toast.warning .toast-progress::after {
+    background: #ffd32a;
+}
+.toast.info .toast-progress::after {
+    background: #3ea6ff;
+}
+
+@keyframes toastSlideIn {
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes toastSlideOut {
+    to {
+        transform: translateX(-320px);
+        opacity: 0;
+    }
+}
+
+@keyframes toastTimer {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0%;
+    }
+}
+
+/* ================= INVENTORY FULL SCREEN ================= */
+
+#inventory-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 15, 23, 0.98);
+    padding: 15px 25px;
+    color: white;
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);
+    z-index: 9998;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.inv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #609ad4;
+    padding-bottom: 8px;
+    flex-shrink: 0;
+}
+
+.inv-title {
+    font-size: 4vw;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+#close-inv-btn,
+.close-inv {
+    cursor: pointer;
+    color: #ffffff;
+    background-color: #ef4444;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 3.5vw;
+    font-weight: bold;
+    transition: 0.2s;
+    user-select: none;
+}
+
+#close-inv-btn:active,
+.close-inv:active {
+    background-color: #b91c1c;
+    transform: scale(0.95);
+}
+
 .inv-main-content {
-    flex: 1; 
+    flex: 1;
     display: flex;
     gap: 15px;
     padding-top: 5px;
     overflow: hidden;
 }
 
-/* Phần bên trái: Lưới túi đồ */
 .inv-grid-section {
-    flex: 2; /* Chiếm 2/3 không gian */
+    flex: 2;
     display: flex;
     flex-direction: column;
 }
 
-/* Phần bên phải: Khu vực búp bê nhân vật */
 .inv-equip-section {
-    flex: 1; /* Chiếm 1/3 không gian */
+    flex: 1;
     display: flex;
     flex-direction: column;
 }
@@ -31,27 +320,26 @@
     text-transform: uppercase;
 }
 
-/* Container chứa hình nhân vật và các ô trang bị */
 .equip-doll-container {
     flex: 1;
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid #333;
     border-radius: 10px;
-    position: relative; /* Quan trọng để các ô trang bị định vị tuyệt đối */
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
 }
 
-/* Hình búp bê nhân vật */
 #char-doll-img {
     max-width: 70%;
     max-height: 80%;
     object-fit: contain;
-    pointer-events: none; /* Không cho click vào ảnh */
+    pointer-events: none;
+    user-select: none;
 }
 
-/* Định vị các cột ô trang bị xung quanh búp bê */
 .equip-column {
     position: absolute;
     top: 50%;
@@ -61,16 +349,27 @@
     gap: 8px;
 }
 
-.column-left { left: 8px; }
-.column-right { right: 8px; }
+.column-left {
+    left: 8px;
+}
 
-/* Tùy chỉnh các ô trang bị (đè lên class .inv-slot cũ) */
+.column-right {
+    right: 8px;
+}
+
 .equip-slot {
     width: 12vw;
     height: 12vw;
     background: rgba(30, 41, 59, 0.7);
     border: 2px solid #475569;
     padding: 2px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    transition: 0.15s;
 }
 
 .equip-slot .slot-placeholder {
@@ -78,17 +377,218 @@
     color: #64748b;
     font-weight: bold;
     text-align: center;
+    line-height: 1.1;
+    pointer-events: none;
 }
 
-/* Làm nổi bật ô khi có vật phẩm */
 .equip-slot:not(.empty) {
     border-color: #38bdf8;
     background: rgba(56, 189, 248, 0.1);
 }
 
-/* Điều chỉnh lại grid để không bị tràn khi có thêm phần trang bị */
+#inv-grid,
 .inv-grid {
+    flex: 1;
+    display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(4, 1fr);
     gap: 6px;
+    padding-bottom: 5px;
+    box-sizing: border-box;
+    overflow: hidden;
 }
+
+.inv-slot {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #444;
+    border-radius: 8px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: 0.2s;
+    box-sizing: border-box;
+    padding: 5px;
+    overflow: hidden;
+}
+
+.inv-slot:active {
+    border-color: #609ad4;
+    background: rgba(96, 154, 212, 0.25);
+    transform: scale(0.97);
+}
+
+.inv-slot.empty {
+    cursor: default;
+    border: 1px dashed #333;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.inv-slot.empty:active {
+    border-color: #333;
+    background: rgba(0, 0, 0, 0.2);
+    transform: none;
+}
+
+.item-icon {
+    width: 55%;
+    height: 55%;
+    object-fit: contain;
+    margin-bottom: 4px;
+    pointer-events: none;
+    user-select: none;
+}
+
+.item-name {
+    font-size: 2.2vw;
+    font-weight: bold;
+    text-align: center;
+    word-break: break-word;
+    color: #f1f5f9;
+    margin-bottom: 2px;
+    line-height: 1.1;
+    max-width: 95%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    pointer-events: none;
+}
+
+.item-qty {
+    position: absolute;
+    bottom: 4px;
+    right: 8px;
+    font-size: 2.5vw;
+    font-weight: 900;
+    color: #00ff88;
+    text-shadow: 1px 1px 2px #000;
+    pointer-events: none;
+}
+
+/* ================= ITEM MODALS ================= */
+
+#item-action-modal,
+#item-info-modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 15, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    border-radius: 8px;
+}
+
+.action-box,
+.info-box {
+    background: #191923;
+    border: 2px solid #609ad4;
+    border-radius: 12px;
+    width: 65%;
+    max-width: 380px;
+    padding: 15px 20px;
+    text-align: center;
+    box-shadow: 0 0 35px rgba(0, 0, 0, 0.8);
+    box-sizing: border-box;
+}
+
+#action-item-name,
+#info-item-title {
+    font-size: 3.5vw;
+    font-weight: bold;
+    color: #38bdf8;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #2d2d3f;
+    padding-bottom: 6px;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.btn-action,
+#btn-close-info {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    font-size: 3vw;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.btn-action:active,
+#btn-close-info:active {
+    transform: scale(0.97);
+}
+
+.btn-use {
+    background-color: #10b981;
+}
+
+.btn-info {
+    background-color: #3b82f6;
+}
+
+.btn-drop {
+    background-color: #f59e0b;
+}
+
+.btn-close,
+#btn-close-info {
+    background-color: #4b5563;
+}
+
+#info-item-desc {
+    color: #cbd5e1;
+    font-size: 2.8vw;
+    line-height: 1.4;
+    margin-bottom: 15px;
+    text-align: left;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 10px;
+    border-radius: 6px;
+    max-height: 90px;
+    overflow-y: auto;
+    word-break: break-word;
+}
+
+/* ================= SMALL RESPONSIVE TWEAKS ================= */
+
+@media (max-width: 900px) {
+    .inv-main-content {
+        gap: 10px;
+    }
+
+    .equip-slot {
+        width: 13vw;
+        height: 13vw;
+    }
+
+    .item-icon {
+        width: 58%;
+        height: 58%;
+    }
+
+    .item-name {
+        font-size: 2.5vw;
+    }
+
+    .item-qty {
+        font-size: 2.8vw;
+    }
+    }
