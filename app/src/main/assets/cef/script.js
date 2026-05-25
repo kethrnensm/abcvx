@@ -98,9 +98,9 @@ function showNotification(eventData) {
     createToast(type, title, message);
 }
 
-/* ================= INVENTORY (ĐÃ SỬA ĐỔI & THÊM LOGIC) ================= */
+/* ================= INVENTORY & EQUIPMENT (ĐÃ NÂNG CẤP) ================= */
 
-// Biến toàn cục để lưu thông tin vật phẩm đang được người chơi ấn chọn
+// Biến toàn cục lưu thông tin vật phẩm được chọn (ở hành trang hoặc trang bị)
 let selectedItem = null; 
 
 // Sự kiện bấm nút đóng túi đồ lớn
@@ -131,7 +131,7 @@ function renderInventory(eventData) {
     // Mở túi đồ
     container.classList.remove('hidden');
     
-    // Parse dữ liệu vật phẩm Pawn gửi qua
+    // --- 1. XỬ LÝ 16 Ô HÀNH TRANG (BÊN TRÁI) ---
     const items = JSON.parse(data[1]); 
     const grid = document.getElementById('inv-grid');
     grid.innerHTML = ""; // Xóa dữ liệu cũ
@@ -143,30 +143,100 @@ function renderInventory(eventData) {
         slot.classList.add("inv-slot");
 
         if (i < items.length) {
-            // Có vật phẩm ở slot này
             slot.innerHTML = `
                 <div class="item-name">${items[i].name}</div>
                 <div class="item-qty">x${items[i].amount}</div>
             `;
             
-            // ĐÃ SỬA: Khi click vào vật phẩm -> Hiện bảng Menu tương tác chứ không dùng luôn
             slot.onclick = () => {
                 openActionMenu(items[i]);
             };
         } else {
-            // Slot trống
             slot.classList.add("empty");
         }
-
         grid.appendChild(slot);
+    }
+
+    // --- 2. XỬ LÝ 8 Ô TRANG BỊ BÚP BÊ (BÊN PHẢI) ---
+    // Kiểm tra xem dữ liệu trang bị có được gửi kèm qua không (data[2])
+    if (data[2]) {
+        const equips = JSON.parse(data[2]); 
+
+        // Khôi phục trạng thái trống (Placeholder) ban đầu cho tất cả ô trang bị
+        const equipSlots = document.querySelectorAll('.equip-slot');
+        equipSlots.forEach(slot => {
+            const slotType = slot.getAttribute('data-slot-type');
+            
+            // Đặt lại tên hiển thị mặc định theo loại ô dựa trên ID gốc (Nón, Áo, Súng 1...)
+            let defaultText = "Trống";
+            if(slotType === "head") defaultText = "Nón";
+            else if(slotType === "body") defaultText = "Áo";
+            else if(slotType === "legs") defaultText = "Quần";
+            else if(slotType === "feet") defaultText = "Giày";
+            else if(slotType === "hand") defaultText = "Găng";
+            else if(slotType === "weapon1") defaultText = "Súng 1";
+            else if(slotType === "weapon2") defaultText = "Súng 2";
+            else if(slotType === "acc") defaultText = "Phụ kiện";
+
+            slot.innerHTML = `<div class="slot-placeholder">${defaultText}</div>`;
+            slot.classList.add('empty');
+            slot.onclick = null; // Xóa sự kiện bấm cũ nếu có
+        });
+
+        // Bản đồ tra cứu từ ID Type (Pawn) sang ID Thẻ HTML
+        const typeToIdMap = {
+            0: "equip-head",     // EQUIP_TYPE_HEAD
+            1: "equip-body",     // EQUIP_TYPE_BODY
+            2: "equip-legs",     // EQUIP_TYPE_LEGS
+            3: "equip-feet",     // EQUIP_TYPE_FEET
+            4: "equip-hand",     // EQUIP_TYPE_HAND
+            5: "equip-weapon-1", // EQUIP_TYPE_WEAPON_1
+            6: "equip-weapon-2", // EQUIP_TYPE_WEAPON_2
+            7: "equip-acc"       // EQUIP_TYPE_ACC
+        };
+
+        // Vẽ các vật phẩm đang được trang bị lên búp bê
+        equips.forEach(equip => {
+            const targetHtmlId = typeToIdMap[equip.type];
+            if (targetHtmlId) {
+                const slot = document.getElementById(targetHtmlId);
+                if (slot) {
+                    slot.innerHTML = `<div class="item-name">${equip.name}</div>`;
+                    slot.classList.remove('empty');
+                    
+                    // Khi click vào đồ đang mang -> Mở menu đổi nút thành "THÁO ĐỒ"
+                    slot.onclick = () => {
+                        openEquipActionMenu(equip);
+                    };
+                }
+            }
+        });
     }
 }
 
 // ---- CÁC HÀM XỬ LÝ ĐÓNG / MỞ BẢNG TƯƠNG TÁC ----
 
 function openActionMenu(item) {
-    selectedItem = item; // Gán vật phẩm được chọn vào biến tạm
+    selectedItem = item; 
     document.getElementById('action-item-name').innerText = item.name;
+    
+    // Đảm bảo nút gốc hiển thị chữ "SỬ DỤNG" khi click đồ trong Hành Trang
+    document.getElementById('btn-use-item').innerText = "SỬ DỤNG";
+    document.getElementById('btn-drop-item').style.display = "block"; // Hiện nút vứt bỏ
+    
+    document.getElementById('item-action-modal').classList.remove('hidden');
+}
+
+// Hàm mở menu tương tác dành riêng cho trang bị đang mang (Để Tháo Ra)
+function openEquipActionMenu(equipItem) {
+    selectedItem = equipItem; // Lưu thông tin đồ đang mang được chọn
+    document.getElementById('action-item-name').innerText = equipItem.name;
+    
+    // Biến đổi nút "SỬ DỤNG" thành nút "THÁO ĐỒ"
+    document.getElementById('btn-use-item').innerText = "THÁO ĐỒ";
+    // Ẩn nút "VỨT BỎ" đi (bắt buộc phải tháo ra hành trang mới cho vứt)
+    document.getElementById('btn-drop-item').style.display = "none"; 
+    
     document.getElementById('item-action-modal').classList.remove('hidden');
 }
 
@@ -180,14 +250,20 @@ function closeInfoMenu() {
 
 // ---- SỰ KIỆN KHI BẤM CÁC NÚT TRONG MENU TƯƠNG TÁC ----
 
-// 1. Xử lý khi bấm nút "SỬ DỤNG"
+// 1. Xử lý khi bấm nút "SỬ DỤNG" (Hoặc "THÁO ĐỒ")
 document.getElementById('btn-use-item').onclick = () => {
     if (!selectedItem) return;
     
-    // Gửi Action "use" kèm ID vật phẩm về cho Pawn xử lý
-    Cef.sendEvent("inventory_action", JSON.stringify(["use", selectedItem.id]));
+    // Nếu nút đang là "THÁO ĐỒ" (Nghĩa là item này lấy từ khu trang bị búp bê)
+    if (document.getElementById('btn-use-item').innerText === "THÁO ĐỒ") {
+        // Gửi lệnh "takeoff" kèm ID vật phẩm về cho Pawn xử lý cất vũ khí/lột skin
+        Cef.sendEvent("inventory_action", JSON.stringify(["takeoff", selectedItem.id]));
+    } else {
+        // Ngược lại thì gửi action "use" bình thường để mặc đồ/ăn uống
+        Cef.sendEvent("inventory_action", JSON.stringify(["use", selectedItem.id]));
+    }
     
-    closeActionMenu(); // Dùng xong tự ẩn menu tương tác đi
+    closeActionMenu(); 
 };
 
 // 2. Xử lý khi bấm nút "THÔNG TIN"
@@ -195,11 +271,8 @@ document.getElementById('btn-info-item').onclick = () => {
     if (!selectedItem) return;
     
     document.getElementById('info-item-title').innerText = selectedItem.name;
-    
-    // Nếu trong chuỗi JSON từ Pawn gửi qua có trường .desc thì hiện, không thì hiện mặc định
     document.getElementById('info-item-desc').innerText = selectedItem.desc || "Vật phẩm này không có mô tả chi tiết.";
     
-    // Mở bảng thông tin đè lên
     document.getElementById('item-info-modal').classList.remove('hidden');
 };
 
@@ -207,10 +280,8 @@ document.getElementById('btn-info-item').onclick = () => {
 document.getElementById('btn-drop-item').onclick = () => {
     if (!selectedItem) return;
     
-    // Gửi Action "drop" kèm ID vật phẩm về cho Pawn xử lý trừ đồ / tạo vật thể dưới đất
     Cef.sendEvent("inventory_action", JSON.stringify(["drop", selectedItem.id]));
-    
-    closeActionMenu(); // Vứt xong tự ẩn menu tương tác đi
+    closeActionMenu(); 
 };
 
 // Đăng ký sự kiện cho các nút quay lại/đóng của menu con
