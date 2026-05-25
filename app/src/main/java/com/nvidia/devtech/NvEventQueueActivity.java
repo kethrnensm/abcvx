@@ -1068,6 +1068,16 @@ private CefClientManager mClientManager = null;
             pauseEvent();
             destroyEGLSurface();
         }
+		@Override
+public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
+{
+    System.out.println("Surface changed: " + width + ", " + height);
+
+    surfaceWidth = width;
+    surfaceHeight = height;
+
+    setWindowSize(surfaceWidth, surfaceHeight);
+}
     });
 
     return true;
