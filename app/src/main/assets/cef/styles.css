@@ -645,4 +645,35 @@ body {
     width: 35px;
     text-align: right;
 }
+#screen-effect-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* Bấm xuyên qua UI xuống game */
+    z-index: 1; /* Nằm dưới các UI nút bấm nhưng phủ lên tầm nhìn */
+    transition: all 0.5s ease-in-out;
+    box-shadow: inset 0 0 0px rgba(0, 0, 0, 0);
+}
+
+/* Trạng thái nguy hiểm: Viền màn hình nhấp nháy đỏ rực rỡ */
+.vignette-danger {
+    animation: pulse-red-vignette 1.5s infinite alternate;
+}
+
+/* Trạng thái mất nước: Màn hình phủ một lớp sương ảo giác mờ nhẹ */
+.dehydration-effect {
+    background: rgba(240, 248, 255, 0.12);
+}
+
+/* Hiệu ứng nhấp nháy viền đỏ áp lực */
+@keyframes pulse-red-vignette {
+    0% {
+        box-shadow: inset 0 0 40px rgba(255, 0, 0, 0.4);
+    }
+    100% {
+        box-shadow: inset 0 0 120px rgba(255, 0, 0, 0.8);
+    }
+}
 
