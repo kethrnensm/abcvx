@@ -302,3 +302,31 @@ function updatePlayerStatus(eventData) {
 
 // Đăng ký sự kiện với hệ thống CEF để Pawn có thể gọi sang
 Cef.registerEventCallback("hud_update", "updatePlayerStatus");
+function updatePlayerStatus(eventData) {
+    const data = JSON.parse(eventData);
+    const food = parseInt(data[0]);
+    const water = parseInt(data[1]);
+
+    // 1. Cập nhật thanh hiển thị % như cũ
+    document.getElementById('food-fill').style.width = food + '%';
+    document.getElementById('food-text').innerText = food + '%';
+    document.getElementById('water-fill').style.width = water + '%';
+    document.getElementById('water-text').innerText = water + '%';
+
+    // 2. XỬ LÝ HIỆU ỨNG TOÀN MÀN HÌNH (DÀNH CHO Ý TƯỞNG 2)
+    const overlay = document.getElementById('screen-effect-overlay');
+    
+    // Nếu đói hoặc khát xuống dưới mức báo động (15%) -> Bật viền đỏ nhấp nháy
+    if (food <= 15 || water <= 15) {
+        overlay.classList.add('vignette-danger');
+    } else {
+        overlay.classList.remove('vignette-danger');
+    }
+
+    // Nếu khát nghiêm trọng (dưới 10%) -> Bật sương mù mờ ảo giác do mất nước
+    if (water <= 10) {
+        overlay.classList.add('dehydration-effect');
+    } else {
+        overlay.classList.remove('dehydration-effect');
+    }
+}
