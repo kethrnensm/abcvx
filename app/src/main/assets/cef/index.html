@@ -22,6 +22,31 @@
             </div>
         </div>
     </div>
+      <div id="auth-overlay" class="hidden">
+        
+        <div id="register-box" class="auth-box hidden">
+            <div class="auth-header">Đăng Ký Tài Khoản Mới</div>
+            <div class="auth-content">
+                <input type="text" id="reg-username" class="auth-input" disabled>
+                <input type="password" id="reg-password" class="auth-input" placeholder="Nhập mật khẩu">
+                <input type="date" id="reg-dob" class="auth-input" placeholder="Ngày sinh">
+                
+                <button id="btn-register" class="auth-button" onclick="sendRegister()">Đăng Ký</button>
+            </div>
+        </div>
+
+        <div id="login-box" class="auth-box hidden">
+            <div class="auth-header">Đăng Nhập Game</div>
+            <div class="auth-content">
+                <input type="text" id="log-username" class="auth-input" disabled>
+                <input type="password" id="log-password" class="auth-input" placeholder="Nhập mật khẩu">
+                
+                <button id="btn-login" class="auth-button" onclick="sendLogin()">Đăng Nhập</button>
+            </div>
+        </div>
+
+      </div>
     <script src="script.js"></script>
+    <script src="auth.js"<>/script>
 </body>
 </html>
