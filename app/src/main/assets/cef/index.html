@@ -7,154 +7,21 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
     <div id="alert-overlay" class="hidden">
         <div class="alert-box">
             <div class="alert-content">
                 <div class="alert-icon">
                     <span>?</span>
                 </div>
-                <div class="alert-title" id="alert-title">
-                    Confirm Title
-                </div>
-                <div class="alert-message" id="alert-message">
-                    Confirm Message
-                </div>
+                <div class="alert-title" id="alert-title">Confirm Title</div>
+                <div class="alert-message" id="alert-message">Confirm Message</div>
                 <div class="alert-buttons">
-                    <button id="okay-button" class="okay-button">
-                        Okay
-                    </button>
-                    <button id="cancel-button" class="cancel-button">
-                        Cancel
-                    </button>
+                    <button id="okay-button" class="okay-button">Okay</button>
+                    <button id="cancel-button" class="cancel-button">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <div id="toast-container"></div>
-
-    <div id="inventory-container" class="hidden">
-        <div class="inv-header">
-            <span class="inv-title">TÚI ĐỒ & TRANG BỊ</span>
-            <span class="close-inv" id="close-inv-btn">✖</span>
-        </div>
-        
-        <div class="inv-main-content">
-
-            <div class="inv-grid-section">
-                <div class="section-title">HÀNH TRANG</div>
-                <div class="inv-grid" id="inv-grid">
-                    </div>
-            </div>
-
-            <div class="inv-equip-section">
-                <div class="section-title">TRANG BỊ</div>
-                <div class="equip-doll-container">
-                    
-                    <img src="images/skins/skin_0.png" id="char-doll-img" alt="Character">
-
-                    <div class="equip-column column-left">
-                        <div class="inv-slot equip-slot" id="equip-head" data-slot-type="head">
-                            <div class="slot-placeholder">Nón</div>
-                        </div>
-                        <div class="inv-slot equip-slot" id="equip-body" data-slot-type="body">
-                            <div class="slot-placeholder">Áo</div>
-                        </div>
-                        <div class="inv-slot equip-slot" id="equip-legs" data-slot-type="legs">
-                            <div class="slot-placeholder">Quần</div>
-                        </div>
-                        <div class="inv-slot equip-slot" id="equip-feet" data-slot-type="feet">
-                            <div class="slot-placeholder">Giày</div>
-                        </div>
-                    </div>
-
-                    <div class="equip-column column-right">
-                        <div class="inv-slot equip-slot" id="equip-hand" data-slot-type="hand">
-                            <div class="slot-placeholder">Găng</div>
-                        </div>
-                        <div class="inv-slot equip-slot" id="equip-weapon-1" data-slot-type="weapon1">
-                            <div class="slot-placeholder">Súng 1</div>
-                        </div>
-                        <div class="inv-slot equip-slot" id="equip-weapon-2" data-slot-type="weapon2">
-                            <div class="slot-placeholder">Súng 2</div>
-                        </div>
-                        <div class="inv-slot equip-slot" id="equip-acc" data-slot-type="acc">
-                            <div class="slot-placeholder">Phụ kiện</div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-        </div> <div id="item-action-modal" class="hidden">
-            <div class="action-box">
-                <div id="action-item-name">TÊN VẬT PHẨM</div>
-                <div class="action-buttons">
-                    <button id="btn-use-item" class="btn-action btn-use">SỬ DỤNG</button>
-                    <button id="btn-info-item" class="btn-action btn-info">THÔNG TIN</button>
-                    <button id="btn-drop-item" class="btn-action btn-drop">VỨT BỎ</button>
-                    <button id="btn-close-action" class="btn-action btn-close">QUAY LẠI</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="item-info-modal" class="hidden">
-            <div class="info-box">
-                <div id="info-item-title">TÊN VẬT PHẨM</div>
-                <div id="info-item-desc">Mô tả chi tiết về vật phẩm sẽ hiển thị ở đây...</div>
-                <button id="btn-close-info">ĐÓNG</button>
-            </div>
-        </div>
-        
-    </div>
-    <div id="screen-effect-overlay"></div>
-    <div id="hud-status-container">
-    <div class="status-bar-wrapper">
-        <span class="status-icon">🍔</span>
-        <div class="status-bar food-bar">
-            <div id="food-fill" style="width: 100%;"></div>
-        </div>
-        <span id="food-text" class="status-text">100%</span>
-    </div>
-    <div class="status-bar-wrapper">
-        <span class="status-icon">💧</span>
-        <div class="status-bar water-bar">
-            <div id="water-fill" style="width: 100%;"></div>
-        </div>
-        <span id="water-text" class="status-text">100%</span>
-    </div>
-</div>
     <script src="script.js"></script>
-    <div id="auth-container" class="hidden">
-    <div class="auth-box">
-        <h2 id="auth-title">ĐĂNG NHẬP</h2>
-        <p id="auth-welcome" class="auth-desc">Vui lòng nhập mật khẩu để vào game.</p>
-        
-        <div class="input-group">
-            <input type="text" id="auth-username" disabled>
-        </div>
-
-        <div class="input-group">
-            <input type="password" id="auth-password" placeholder="Nhập mật khẩu...">
-        </div>
-
-        <div class="input-group reg-field hidden">
-            <select id="auth-gender">
-                <option value="" disabled selected>Chọn giới tính...</option>
-                <option value="1">Nam</option>
-                <option value="2">Nữ</option>
-            </select>
-        </div>
-
-        <div class="input-group reg-field hidden">
-            <label style="display:block; text-align:left; font-size:12px; color:#aaa; margin-bottom:5px;">Ngày tháng năm sinh:</label>
-            <input type="date" id="auth-birthdate">
-        </div>
-        
-        <button id="btn-auth-submit" onclick="submitAuth()">ĐĂNG NHẬP</button>
-    </div>
-</div>
-
 </body>
-    </html>
+</html>
