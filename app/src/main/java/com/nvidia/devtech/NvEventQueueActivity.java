@@ -1524,17 +1524,24 @@ public void surfaceChanged(SurfaceHolder holder, int format, int width, int heig
         System.exit(0);
     }
     public void setPauseState(boolean z2) {
-        if (mAndroidUI == null) {
-            mAndroidUI = (FrameLayout) findViewById(R.id.ui_layout);
-        }
-		if (mJavaManager.isShow()) {
-            if (z2)
-                mJavaManager.hideBrowserView();
-            else
-                mJavaManager.showBrowserView();
-		}
-        runOnUiThread(() -> mAndroidUI.setVisibility(z2 ? View.GONE:View.VISIBLE));
+    if (mAndroidUI == null) {
+        mAndroidUI = (FrameLayout) findViewById(R.id.ui_layout);
     }
+
+    // Đưa toàn bộ các hàm chạm vào giao diện (UI/WebView) vào luồng chính (Main Thread)
+    runOnUiThread(() -> {
+        if (mJavaManager.isShow()) {
+            if (z2) {
+                mJavaManager.hideBrowserView();
+            } else {
+                mJavaManager.showBrowserView();
+            }
+        }
+        
+        // Ẩn hoặc hiện mAndroidUI tùy thuộc vào trạng thái pause (z2)
+        mAndroidUI.setVisibility(z2 ? View.GONE : View.VISIBLE);
+    });
+	}
 
     public void updateHudInfo(int health, int armour, int weaponid, int ammo, int playerid, int money, int wanted) { runOnUiThread(() -> { mHudManager.UpdateHudInfo(health, armour, weaponid, ammo, playerid, money, wanted); }); }
     public void showHud() { runOnUiThread(() -> { mHudManager.ShowHud(); }); }
