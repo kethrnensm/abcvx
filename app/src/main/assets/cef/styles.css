@@ -1,606 +1,81 @@
-/* =========================================================================
-   MOBILE INVENTORY UI - OPTIMIZED FOR SA-MP MOBILE CEF
-   Nhân loại cuối cùng cũng nhận ra nhét UI PC 950px vào điện thoại 6 inch
-   là ý tưởng tệ. Mất có vài năm thôi.
-   ========================================================================= */
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-}
-
 body {
     font-family: Arial, sans-serif;
-    background: transparent;
-    overflow: hidden;
-    user-select: none;
+    background-color: transparent;
 }
-
-/* =========================================================================
-   GLOBAL
-   ========================================================================= */
 
 .hidden {
     display: none !important;
 }
 
-/* =========================================================================
-   ALERT
-   ========================================================================= */
-
 #alert-overlay {
     position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.55);
-
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-
-    z-index: 9999;
 }
 
 .alert-box {
-    width: 82%;
-    max-width: 320px;
-
-    background: #fff;
-
-    border-radius: 10px;
-
-    overflow: hidden;
-}
-
-.alert-content {
-    padding: 18px;
+    background-color: white;
+    border-radius: 8px;
+    width: 300px;
     text-align: center;
 }
 
+.alert-header {
+    background-color: #609ad4;
+    padding: 10px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.alert-content {
+    padding: 20px;
+}
+
 .alert-icon {
-    font-size: 38px;
+    font-size: 40px;
     color: #609ad4;
     margin-bottom: 10px;
 }
 
 .alert-title {
-    font-size: 18px;
     font-weight: bold;
-
+    font-size: 18px;
     margin-bottom: 10px;
 }
 
 .alert-message {
-    font-size: 14px;
-    margin-bottom: 18px;
-}
-
-.alert-buttons {
-    display: flex;
-    gap: 10px;
+    margin-bottom: 20px;
 }
 
 .alert-buttons button {
-    flex: 1;
-
+    padding: 10px 20px;
     border: none;
-    border-radius: 6px;
-
-    padding: 12px;
-
-    font-weight: bold;
-
-    color: #fff;
+    border-radius: 4px;
+    margin: 5px;
+    cursor: pointer;
 }
 
 .okay-button {
-    background: #609ad4;
+    background-color: #609ad4;
+    color: white;
 }
 
 .cancel-button {
-    background: #f08080;
+    background-color: #f08080;
+    color: white;
 }
-
-/* =========================================================================
-   AUTH
-   ========================================================================= */
-
-#auth-overlay {
-    position: fixed;
-    inset: 0;
-
-    background: rgba(0,0,0,0.72);
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    backdrop-filter: blur(3px);
-
-    z-index: 5000;
-}
-
-.auth-box {
-    width: 88%;
-    max-width: 360px;
-
-    background: #1d1d1d;
-
-    border-radius: 12px;
-
-    overflow: hidden;
-
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.auth-header {
-    background: #609ad4;
-
-    padding: 15px;
-
-    text-align: center;
-
-    font-size: 18px;
-    font-weight: bold;
-
-    color: #fff;
-}
-
-.auth-content {
-    padding: 18px;
-
-    display: flex;
-    flex-direction: column;
-
-    gap: 14px;
-}
-
-.auth-input {
-    width: 100%;
-
-    padding: 13px;
-
-    border: 1px solid #3d3d3d;
-    border-radius: 8px;
-
-    background: #2a2a2a;
-
-    color: #fff;
-
-    outline: none;
-
-    font-size: 14px;
-}
-
-.auth-input:focus {
-    border-color: #609ad4;
-}
-
-.auth-input:disabled {
-    background: #151515;
-    color: #888;
-}
-
-.auth-button {
-    border: none;
-    border-radius: 8px;
-
-    padding: 13px;
-
-    background: #609ad4;
-
-    color: #fff;
-
-    font-size: 15px;
-    font-weight: bold;
-}
-
-.auth-button:active {
-    transform: scale(0.98);
-}
-
-/* =========================================================================
-   INVENTORY ROOT
-   ========================================================================= */
-
-#inventory-container {
-    display: none;
-}
-
-.inv-main {
-    position: fixed;
-
-    inset: 0;
-
-    width: 100vw;
-    height: 100vh;
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(8, 15, 24, 0.96),
-            rgba(4, 9, 15, 0.98)
-        );
-
-    display: flex;
-    flex-direction: column;
-
-    overflow: hidden;
-
-    color: #fff;
-
-    z-index: 3000;
-}
-
-/* =========================================================================
-   LEFT PANEL
-   ========================================================================= */
-
-.left-panel {
-    width: 100%;
-    height: 58%;
-
-    padding: 12px;
-
-    display: flex;
-    flex-direction: column;
-}
-
-/* =========================================================================
-   EQUIP
-   ========================================================================= */
-
-.equip-section {
-    margin-bottom: 12px;
-}
-
-.section-title {
-    display: block;
-
-    margin-bottom: 10px;
-
-    color: #6d8ba7;
-
-    font-size: 11px;
-    font-weight: bold;
-
-    letter-spacing: 1px;
-}
-
-.equip-grid {
-    display: grid;
-
-    grid-template-columns: repeat(6, 1fr);
-
-    gap: 6px;
-}
-
-.equip-slot {
-    position: relative;
-
-    aspect-ratio: 1/1;
-
-    border-radius: 8px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(22, 34, 48, 0.9),
-            rgba(10, 18, 28, 0.9)
-        );
-
-    border: 1px dashed rgba(0,229,255,0.3);
-}
-
-.equip-slot.empty::before {
-    content: attr(data-slot);
-
-    position: absolute;
-
-    inset: 0;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    text-align: center;
-
-    font-size: 9px;
-
-    color: #5d7388;
-
-    padding: 4px;
-}
-
-/* =========================================================================
-   INVENTORY HEADER
-   ========================================================================= */
-
-.inv-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    margin-bottom: 10px;
-}
-
-.inv-header .title {
-    font-size: 17px;
-    font-weight: bold;
-
-    color: #fff;
-}
-
-.slot-count {
-    padding: 4px 10px;
-
-    border-radius: 999px;
-
-    background: rgba(0,229,255,0.1);
-
-    color: #00e5ff;
-
-    font-size: 11px;
-    font-weight: bold;
-}
-
-/* =========================================================================
-   INVENTORY GRID
-   ========================================================================= */
-
-.inv-grid {
-    flex: 1;
-
-    display: grid;
-
-    grid-template-columns: repeat(4, 1fr);
-
-    gap: 8px;
-
-    overflow-y: auto;
-
-    padding-right: 3px;
-}
-
-.inv-slot {
-    position: relative;
-
-    aspect-ratio: 1/1;
-
-    border-radius: 8px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(18, 29, 43, 0.95),
-            rgba(10, 18, 28, 0.95)
-        );
-
-    border: 1px solid rgba(41, 62, 88, 0.8);
-
-    overflow: hidden;
-}
-
-.inv-slot:active {
-    transform: scale(0.96);
-}
-
-.item-qty {
-    position: absolute;
-
-    top: 5px;
-    right: 6px;
-
-    font-size: 10px;
-    font-weight: bold;
-
-    color: #00e5ff;
-
-    z-index: 5;
-}
-
-.inv-slot img,
-.equip-slot img {
-    width: 75%;
-    height: 75%;
-
-    object-fit: contain;
-
-    margin: 12.5%;
-}
-
-/* =========================================================================
-   ACTIVE SLOT
-   ========================================================================= */
-
-.active-slot {
-    border-color: #00e5ff !important;
-
-    box-shadow:
-        0 0 12px rgba(0,229,255,0.4),
-        inset 0 0 10px rgba(0,229,255,0.15);
-}
-
-/* =========================================================================
-   RIGHT PANEL
-   ========================================================================= */
-
-.right-panel {
-    width: 100%;
-    height: 42%;
-
-    background: rgba(255,255,255,0.03);
-
-    border-top:
-        1px solid rgba(255,255,255,0.05);
-
-    padding: 14px;
-
-    overflow: hidden;
-}
-
-.detail-placeholder {
-    width: 100%;
-    height: 100%;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    text-align: center;
-
-    color: #61788e;
-
-    font-size: 13px;
-}
-
-.detail-content {
-    width: 100%;
-    height: 100%;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.item-preview {
-    width: 90px;
-    height: 90px;
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(0,229,255,0.08),
-            rgba(0,0,0,0.2)
-        );
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    margin-bottom: 10px;
-}
-
-.item-preview img {
-    width: 70%;
-    height: 70%;
-    object-fit: contain;
-}
-
-#detail-name {
-    font-size: 17px;
-    font-weight: bold;
-
-    margin-bottom: 6px;
-
-    text-align: center;
-}
-
-.rarity {
-    padding: 4px 10px;
-
-    border-radius: 999px;
-
-    font-size: 10px;
-    font-weight: bold;
-
-    margin-bottom: 10px;
-}
-
-.rarity.common {
-    background: rgba(160,160,160,0.15);
-    color: #cfcfcf;
-}
-
-.rarity.rare {
-    background: rgba(0,229,255,0.15);
-    color: #00e5ff;
-}
-
-.rarity.legendary {
-    background: rgba(255,152,0,0.18);
-    color: #ff9800;
-}
-
-.item-desc {
-    font-size: 12px;
-
-    text-align: center;
-
-    color: #9eb1c4;
-
-    line-height: 1.5;
-
-    margin-bottom: auto;
-
-    overflow-y: auto;
-}
-
-/* =========================================================================
-   BUTTONS
-   ========================================================================= */
-
-.action-buttons {
-    width: 100%;
-
-    display: flex;
-    flex-direction: column;
-
-    gap: 8px;
-
-    margin-top: 12px;
-}
-
-.action-buttons button {
-    width: 100%;
-
-    border: none;
-    border-radius: 8px;
-
-    padding: 12px;
-
-    font-size: 13px;
-    font-weight: bold;
-
-    color: #fff;
-}
-
-.btn-use {
-    background: #00bcd4;
-}
-
-.btn-trade {
-    background: #243648;
-}
-
-.btn-delete {
-    background: #d84343;
-}
-
-/* =========================================================================
-   SCROLLBAR
-   ========================================================================= */
-
-::-webkit-scrollbar {
-    width: 3px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(0,229,255,0.4);
-    border-radius: 999px;
-}
-
-/* =========================================================================
-   MOBILE SAFE AREA
-   ========================================================================= */
-
-@supports (padding: max(0px)) {
-
-    .inv-main {
-        padding-top: env(safe-area-inset-top);
-        padding-bottom: env(safe-area-inset-bottom);
-    }
-    }
