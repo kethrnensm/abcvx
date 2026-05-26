@@ -7,10 +7,11 @@ function renderInventory(eventData) {
     const items = JSON.parse(data[1] || "[]");
     const equips = JSON.parse(data[2] || "[]");
 
-    // 1. Reset panel chi tiết
+    // 1. Reset panel chi tiết về trạng thái ban đầu
     document.getElementById('detail-placeholder').classList.remove('hidden');
     document.getElementById('detail-content').classList.add('hidden');
     selectedItem = null;
+    isEquipSlotSelected = false;
 
     // 2. Render 56 ô đồ hành trang
     const grid = document.getElementById('inv-grid');
@@ -24,27 +25,36 @@ function renderInventory(eventData) {
         if (i < items.length) {
             slot.innerHTML = `
                 <div class="item-qty">x${items[i].amount}</div>
-                <img src="${items[i].icon}" style="width:75%; margin:12.5%;">
+                <img src="${items[i].icon}" style="width:75%; height:75%; margin:12.5%; object-fit:contain;">
             `;
-            // Lắng nghe click vật phẩm trong túi
-            slot.onclick = () => showItemDetails(items[i], false);
+            // Lắng nghe click vật phẩm trong túi đồ
+            slot.onclick = (e) => {
+                removeActiveStates();
+                slot.classList.add('active-slot'); // Thêm viền sáng khi chọn đồ
+                showItemDetails(items[i], false);
+            };
         }
         grid.appendChild(slot);
     }
 
-    // 3. Render các ô trang bị
+    // 3. Render các ô trang bị (0 đến 5)
     for (let slotId = 0; slotId < 6; slotId++) {
         const eSlot = document.getElementById(`equip-${slotId}`);
         const eqItem = equips.find(e => e.type === slotId);
         
         if (eqItem) {
-            eSlot.innerHTML = `<img src="${eqItem.icon}" style="width:80%; margin:10%;">`;
+            eSlot.innerHTML = `<img src="${eqItem.icon}" style="width:80%; height:80%; margin:10%; object-fit:contain;">`;
             eSlot.classList.remove('empty');
-            eSlot.onclick = () => showItemDetails(eqItem, true);
+            eSlot.onclick = () => {
+                removeActiveStates();
+                eSlot.classList.add('active-slot'); // Thêm viền sáng khi chọn đồ đang mặc
+                showItemDetails(eqItem, true);
+            };
         } else {
             eSlot.innerHTML = "";
             eSlot.classList.add('empty');
-            eSlot.onclick = null;
+            // Nếu ô trống, cho phép click để nhận biết (bạn có thể viết thêm logic thông báo tại đây)
+            eSlot.onclick = () => clickEquipSlot(slotId); 
         }
     }
 }
@@ -66,7 +76,7 @@ function showItemDetails(item, isEquipped) {
     rarityBadge.innerText = item.rarity || "COMMON";
     rarityBadge.className = `rarity ${item.rarity?.toLowerCase() || 'common'}`;
 
-    // Đổi tên nút hành động chính nếu đồ đang mặc
+    // Đổi tên và màu nút hành động chính nếu đồ đang mặc trên người
     const mainBtn = document.getElementById('btn-action-main');
     if (isEquipped) {
         mainBtn.innerText = "❌ THÁO ĐỒ";
@@ -77,12 +87,29 @@ function showItemDetails(item, isEquipped) {
     }
 }
 
+// Hàm bổ trợ: Xóa viền sáng của các ô cũ khi click chọn ô mới
+function removeActiveStates() {
+    document.querySelectorAll('.inv-slot, .equip-slot').forEach(slot => {
+        slot.classList.remove('active-slot');
+    });
+}
+
+// Hàm xử lý khi người chơi bấm vào một ô trang bị TRỐNG (Đồng bộ với thuộc tính onclick trong HTML của bạn)
+function clickEquipSlot(slotId) {
+    removeActiveStates();
+    // Reset thông tin bên phải nếu bấm trúng ô trống
+    document.getElementById('detail-placeholder').classList.remove('hidden');
+    document.getElementById('detail-content').classList.add('hidden');
+    selectedItem = null;
+    isEquipSlotSelected = false;
+}
+
 // Gửi lệnh về Server qua thư viện sampmobilecef
 function sendAction(actionType) {
     if (!selectedItem) return;
     
-    // Nếu đang chọn đồ trang bị mà nhấn nút chính -> chuyển action thành takeoff (Tháo đồ)
     let finalAction = actionType;
+    // Nếu đang chọn đồ trang bị mà nhấn nút chính -> chuyển action thành takeoff (Tháo đồ)
     if (isEquipSlotSelected && actionType === 'use') {
         finalAction = 'takeoff';
     }
