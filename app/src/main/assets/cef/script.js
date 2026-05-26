@@ -78,10 +78,11 @@ function renderInventory(eventData) {
     }
     document.getElementById('inventory-container').classList.remove('hidden');
 
-    // Render Hành Trang
-    const items = JSON.parse(data[1] || "[]");
+    // FIX: Bỏ JSON.parse ở data[1] vì từ file Pawn (dùng thư viện YSI JSON) gửi qua đã là dạng Object/Array chuẩn
+    const items = data[1] || [];
     const grid = document.getElementById('inv-grid');
     grid.innerHTML = "";
+    
     for (let i = 0; i < 16; i++) {
         const slot = document.createElement("div");
         slot.className = "inv-slot " + (i < items.length ? "" : "empty");
@@ -92,11 +93,20 @@ function renderInventory(eventData) {
         grid.appendChild(slot);
     }
 
-    // Render Trang Bị
+    // FIX: Bỏ JSON.parse ở data[2]
     if (data[2]) {
-        const equips = JSON.parse(data[2] || "[]");
-        document.querySelectorAll('.equip-slot').forEach(s => { s.innerHTML = `<div class="slot-placeholder">${s.getAttribute('data-slot-type')}</div>`; s.classList.add('empty'); });
-        const typeToIdMap = {0: "equip-head", 1: "equip-body", 2: "equip-legs", 3: "equip-feet", 4: "equip-hand", 5: "equip-weapon-1", 6: "equip-weapon-2", 7: "equip-acc"};
+        const equips = data[2] || [];
+        document.querySelectorAll('.equip-slot').forEach(s => { 
+            s.innerHTML = `<div class="slot-placeholder">${s.getAttribute('data-slot-type')}</div>`; 
+            s.classList.add('empty'); 
+        });
+        
+        const typeToIdMap = {
+            0: "equip-head", 1: "equip-body", 2: "equip-legs", 
+            3: "equip-feet", 4: "equip-hand", 5: "equip-weapon-1", 
+            6: "equip-weapon-2", 7: "equip-acc"
+        };
+        
         equips.forEach(equip => {
             const slot = document.getElementById(typeToIdMap[equip.type]);
             if (slot) {
@@ -108,10 +118,28 @@ function renderInventory(eventData) {
     }
 }
 
-function openActionMenu(item) { selectedItem = item; document.getElementById('action-item-name').innerText = item.name; document.getElementById('item-action-modal').classList.remove('hidden'); }
-function openEquipActionMenu(item) { selectedItem = item; document.getElementById('action-item-name').innerText = item.name; document.getElementById('btn-use-item').innerText = "THÁO ĐỒ"; document.getElementById('btn-drop-item').style.display = "none"; document.getElementById('item-action-modal').classList.remove('hidden'); }
-function closeActionMenu() { document.getElementById('item-action-modal').classList.add('hidden'); resetActionMenuState(); }
-function closeInfoMenu() { document.getElementById('item-info-modal').classList.add('hidden'); }
+function openActionMenu(item) { 
+    selectedItem = item; 
+    document.getElementById('action-item-name').innerText = item.name; 
+    document.getElementById('item-action-modal').classList.remove('hidden'); 
+}
+
+function openEquipActionMenu(item) { 
+    selectedItem = item; 
+    document.getElementById('action-item-name').innerText = item.name; 
+    document.getElementById('btn-use-item').innerText = "THÁO ĐỒ"; 
+    document.getElementById('btn-drop-item').style.display = "none"; 
+    document.getElementById('item-action-modal').classList.remove('hidden'); 
+}
+
+function closeActionMenu() { 
+    document.getElementById('item-action-modal').classList.add('hidden'); 
+    resetActionMenuState(); 
+}
+
+function closeInfoMenu() { 
+    document.getElementById('item-info-modal').classList.add('hidden'); 
+}
 
 document.getElementById('btn-use-item').onclick = () => {
     if (!selectedItem) return;
@@ -119,12 +147,18 @@ document.getElementById('btn-use-item').onclick = () => {
     Cef.sendEvent("inventory_action", JSON.stringify([action, selectedItem.id]));
     closeActionMenu();
 };
+
 document.getElementById('btn-info-item').onclick = () => {
     document.getElementById('info-item-title').innerText = selectedItem.name;
     document.getElementById('info-item-desc').innerText = selectedItem.desc || "Không có mô tả.";
     document.getElementById('item-info-modal').classList.remove('hidden');
 };
-document.getElementById('btn-drop-item').onclick = () => { Cef.sendEvent("inventory_action", JSON.stringify(["drop", selectedItem.id])); closeActionMenu(); };
+
+document.getElementById('btn-drop-item').onclick = () => { 
+    Cef.sendEvent("inventory_action", JSON.stringify(["drop", selectedItem.id])); 
+    closeActionMenu(); 
+};
+
 document.getElementById('btn-close-action').onclick = closeActionMenu;
 document.getElementById('btn-close-info').onclick = closeInfoMenu;
 
@@ -136,7 +170,8 @@ function updatePlayerStatus(eventData) {
     document.getElementById('water-fill').style.width = data[1] + '%';
     document.getElementById('water-text').innerText = data[1] + '%';
     const overlay = document.getElementById('screen-effect-overlay');
-    if (data[0] <= 15 || data[1] <= 15) overlay.classList.add('vignette-danger'); else overlay.classList.remove('vignette-danger');
+    if (data[0] <= 15 || data[1] <= 15) overlay.classList.add('vignette-danger'); 
+    else overlay.classList.remove('vignette-danger');
 }
 
 /* ================= EVENT REGISTRATION ================= */
