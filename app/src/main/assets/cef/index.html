@@ -1,98 +1,259 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CEF Example Web</title>
+    <title>CEF Inventory</title>
+
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+    <!-- ================= ALERT UI ================= -->
     <div id="alert-overlay" class="hidden">
         <div class="alert-box">
             <div class="alert-content">
+
                 <div class="alert-icon">
                     <span>?</span>
                 </div>
-                <div class="alert-title" id="alert-title">Confirm Title</div>
-                <div class="alert-message" id="alert-message">Confirm Message</div>
+
+                <div class="alert-title" id="alert-title">
+                    Confirm Title
+                </div>
+
+                <div class="alert-message" id="alert-message">
+                    Confirm Message
+                </div>
+
                 <div class="alert-buttons">
-                    <button id="okay-button" class="okay-button">Okay</button>
-                    <button id="cancel-button" class="cancel-button">Cancel</button>
+                    <button id="okay-button" class="okay-button">
+                        Okay
+                    </button>
+
+                    <button id="cancel-button" class="cancel-button">
+                        Cancel
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= AUTH UI ================= -->
+    <div id="auth-overlay" class="hidden">
+
+        <!-- REGISTER -->
+        <div id="register-box" class="auth-box hidden">
+
+            <div class="auth-header">
+                Đăng Ký Tài Khoản Mới
+            </div>
+
+            <div class="auth-content">
+
+                <input
+                    type="text"
+                    id="reg-username"
+                    class="auth-input"
+                    disabled
+                >
+
+                <input
+                    type="password"
+                    id="reg-password"
+                    class="auth-input"
+                    placeholder="Nhập mật khẩu"
+                >
+
+                <input
+                    type="date"
+                    id="reg-dob"
+                    class="auth-input"
+                >
+
+                <button
+                    id="btn-register"
+                    class="auth-button"
+                    onclick="sendRegister()"
+                >
+                    Đăng Ký
+                </button>
+
+            </div>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="login-box" class="auth-box hidden">
+
+            <div class="auth-header">
+                Đăng Nhập Game
+            </div>
+
+            <div class="auth-content">
+
+                <input
+                    type="text"
+                    id="log-username"
+                    class="auth-input"
+                    disabled
+                >
+
+                <input
+                    type="password"
+                    id="log-password"
+                    class="auth-input"
+                    placeholder="Nhập mật khẩu"
+                >
+
+                <button
+                    id="btn-login"
+                    class="auth-button"
+                    onclick="sendLogin()"
+                >
+                    Đăng Nhập
+                </button>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= INVENTORY ================= -->
+    <div id="inventory-container" class="inv-main">
+
+        <!-- LEFT PANEL -->
+        <div class="left-panel">
+
+            <!-- EQUIPMENT -->
+            <div class="equip-section">
+
+                <span class="section-title">
+                    TRANG BỊ
+                </span>
+
+                <div class="equip-grid">
+
+                    <div class="equip-slot empty"
+                        id="equip-0"
+                        data-slot="Nón"
+                        onclick="clickEquipSlot(0)">
+                    </div>
+
+                    <div class="equip-slot empty"
+                        id="equip-1"
+                        data-slot="Áo"
+                        onclick="clickEquipSlot(1)">
+                    </div>
+
+                    <div class="equip-slot empty"
+                        id="equip-2"
+                        data-slot="Quần"
+                        onclick="clickEquipSlot(2)">
+                    </div>
+
+                    <div class="equip-slot empty"
+                        id="equip-3"
+                        data-slot="Giày"
+                        onclick="clickEquipSlot(3)">
+                    </div>
+
+                    <div class="equip-slot empty"
+                        id="equip-4"
+                        data-slot="Vũ khí 1"
+                        onclick="clickEquipSlot(4)">
+                    </div>
+
+                    <div class="equip-slot empty"
+                        id="equip-5"
+                        data-slot="Vũ khí 2"
+                        onclick="clickEquipSlot(5)">
+                    </div>
+
                 </div>
             </div>
+
+            <!-- INVENTORY HEADER -->
+            <div class="inv-header">
+
+                <span class="title">
+                    TÚI ĐỒ CÁ NHÂN
+                </span>
+
+                <span class="slot-count" id="slot-text">
+                    0 / 56 SLOT
+                </span>
+
+            </div>
+
+            <!-- INVENTORY GRID -->
+            <div class="inv-grid" id="inv-grid"></div>
+
         </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="right-panel" id="detail-panel">
+
+            <!-- PLACEHOLDER -->
+            <div class="detail-placeholder" id="detail-placeholder">
+                <p>Chọn một vật phẩm để xem thông tin</p>
+            </div>
+
+            <!-- DETAIL CONTENT -->
+            <div class="detail-content hidden" id="detail-content">
+
+                <div class="item-preview">
+                    <img id="detail-icon" src="" alt="">
+                </div>
+
+                <h2 id="detail-name">
+                    VẬT PHẨM
+                </h2>
+
+                <span class="rarity" id="detail-rarity">
+                    COMMON
+                </span>
+
+                <p class="item-desc" id="detail-desc">
+                    Mô tả vật phẩm ở đây...
+                </p>
+
+                <div class="action-buttons">
+
+                    <button
+                        class="btn-use"
+                        id="btn-action-main"
+                        onclick="sendAction('use')"
+                    >
+                        ⚡ SỬ DỤNG
+                    </button>
+
+                    <button
+                        class="btn-trade"
+                        onclick="sendAction('trade')"
+                    >
+                        🤝 GIAO DỊCH
+                    </button>
+
+                    <button
+                        class="btn-delete"
+                        onclick="sendAction('drop')"
+                    >
+                        🗑 XOÁ BỎ
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
-      <div id="auth-overlay" class="hidden">
-        
-        <div id="register-box" class="auth-box hidden">
-            <div class="auth-header">Đăng Ký Tài Khoản Mới</div>
-            <div class="auth-content">
-                <input type="text" id="reg-username" class="auth-input" disabled>
-                <input type="password" id="reg-password" class="auth-input" placeholder="Nhập mật khẩu">
-                <input type="date" id="reg-dob" class="auth-input" placeholder="Ngày sinh">
-                
-                <button id="btn-register" class="auth-button" onclick="sendRegister()">Đăng Ký</button>
-            </div>
-        </div>
 
-        <div id="login-box" class="auth-box hidden">
-            <div class="auth-header">Đăng Nhập Game</div>
-            <div class="auth-content">
-                <input type="text" id="log-username" class="auth-input" disabled>
-                <input type="password" id="log-password" class="auth-input" placeholder="Nhập mật khẩu">
-                
-                <button id="btn-login" class="auth-button" onclick="sendLogin()">Đăng Nhập</button>
-            </div>
-        </div>
-
-      </div>
-    <div id="inventory-container" class="inv-main">
-    <div class="left-panel">
-        <div class="equip-section">
-            <span class="section-title">TRANG BỊ</span>
-            <div class="equip-grid">
-                <div class="equip-slot empty" id="equip-0" data-slot="Nón" onclick="clickEquipSlot(0)"></div>
-                <div class="equip-slot empty" id="equip-1" data-slot="Áo" onclick="clickEquipSlot(1)"></div>
-                <div class="equip-slot empty" id="equip-2" data-slot="Quần" onclick="clickEquipSlot(2)"></div>
-                <div class="equip-slot empty" id="equip-3" data-slot="Giày" onclick="clickEquipSlot(3)"></div>
-                <div class="equip-slot empty" id="equip-4" data-slot="Vũ khí 1" onclick="clickEquipSlot(4)"></div>
-                <div class="equip-slot empty" id="equip-5" data-slot="Vũ khí 2" onclick="clickEquipSlot(5)"></div>
-            </div>
-        </div>
-
-        <div class="inv-header">
-            <span class="title">TÚI ĐỒ CÁ NHÂN</span>
-            <span class="slot-count" id="slot-text">0 / 56 SLOT</span>
-        </div>
-        
-        <div class="inv-grid" id="inv-grid"></div>
-    </div>
-
-    <div class="right-panel" id="detail-panel">
-        <div class="detail-placeholder" id="detail-placeholder">
-            <p>Chọn một vật phẩm để xem thông tin</p>
-        </div>
-        
-        <div class="detail-content hidden" id="detail-content">
-            <div class="item-preview">
-                <img id="detail-icon" src="" alt="">
-            </div>
-            <h2 id="detail-name">VẬT PHẨM</h2>
-            <span class="rarity" id="detail-rarity">COMMON</span>
-            
-            <p class="item-desc" id="detail-desc">Mô tả vật phẩm ở đây...</p>
-            
-            <div class="action-buttons">
-                <button class="btn-use" id="btn-action-main" onclick="sendAction('use')">⚡ SỬ DỤNG</button>
-                <button class="btn-trade" onclick="sendAction('trade')">🤝 GIAO DỊCH</button>
-                <button class="btn-delete" onclick="sendAction('drop')">🗑 XOÁ BỎ</button>
-            </div>
-        </div>
-    </div>
-</div>
-
+    <!-- ================= SCRIPTS ================= -->
     <script src="script.js"></script>
-    <script src="auth.js"<>/script>
-    <script src="inventory.js"<>/script>
+    <script src="auth.js"></script>
+    <script src="inventory.js"></script>
+
 </body>
-</html>
+    </html>
