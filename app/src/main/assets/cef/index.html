@@ -67,7 +67,94 @@
 
         </div>
     </div>
+	    <div class="tablet" id="tabletMenu">
+        <div class="notch"></div>
+        <div class="screen">
+            <div class="app-grid">
+                <div class="app" onclick="handleAppClick('Chứng khoán', true)">
+                    <div class="icon bg-dark"><i class="fa-solid fa-lock"></i></div>
+                    <span class="label">Chứng khoán</span>
+                </div>
+                <div class="app" onclick="handleAppClick('V.I.P Citizens', true)">
+                    <div class="icon bg-brown"><i class="fa-solid fa-lock"></i></div>
+                    <span class="label">V.I.P Citizens</span>
+                </div>
+                <div class="app" onclick="handleAppClick('Ghi chú', true)">
+                    <div class="icon bg-olive"><i class="fa-solid fa-lock"></i></div>
+                    <span class="label">Ghi chú</span>
+                </div>
+                <div class="app" onclick="handleAppClick('Âm nhạc', true)">
+                    <div class="icon bg-red"><i class="fa-solid fa-lock"></i></div>
+                    <span class="label">Âm nhạc</span>
+                </div>
+                <div class="app" onclick="handleAppClick('Toét tơ', true)">
+                    <div class="icon bg-teal"><i class="fa-solid fa-lock"></i></div>
+                    <span class="label">Toét tơ</span>
+                </div>
+
+                <div class="app" onclick="handleAppClick('Xổ số', true)">
+                    <div class="icon bg-green-dark"><i class="fa-solid fa-lock"></i></div>
+                    <span class="label">Xổ số</span>
+                </div>
+                <div class="app" onclick="handleAppClick('Trình duyệt', true)">
+                    <div class="icon bg-blue-dark"><i class="fa-solid fa-lock"></i></div>
+                    <span class="label">Trình duyệt</span>
+                </div>
+                <div class="app" onclick="handleAppClick('Pena Taxi', true)">
+                    <div class="icon bg-olive"><i class="fa-solid fa-lock"></i></div>
+                    <span class="label">Pena Taxi</span>
+                </div>
+                <div class="app" onclick="handleAppClick('Phương tiện', true)">
+                    <div class="icon bg-green-dark"><i class="fa-solid fa-lock"></i></div>
+                    <span class="label">Phương tiện</span>
+                </div>
+                <div class="app" onclick="handleAppClick('Sự kiện', true)">
+                    <div class="icon bg-red"><i class="fa-solid fa-lock"></i></div>
+                    <span class="label">Sự kiện</span>
+                </div>
+            </div>
+
+            <div class="dock">
+                <div class="app" onclick="handleAppClick('Việc làm', false)">
+                    <div class="icon dock-green"><i class="fa-solid fa-briefcase"></i></div>
+                    <span class="label">Việc làm</span>
+                </div>
+                <div class="app" onclick="handleAppClick('Định vị', false)">
+                    <div class="icon dock-orange"><i class="fa-solid fa-map-location-dot"></i></div>
+                    <span class="label">Định vị</span>
+                </div>
+                <div class="app" onclick="handleAppClick('Nhóm hội', false)">
+                    <div class="icon dock-purple"><i class="fa-solid fa-users"></i></div>
+                    <span class="label">Nhóm hội</span>
+                </div>
+                <div class="app" onclick="handleAppClick('Cài đặt', false)">
+                    <div class="icon dock-gray"><i class="fa-solid fa-gear"></i></div>
+                    <span class="label">Cài đặt</span>
+                </div>
+            </div>
+            
+            <div class="home-indicator"></div>
+        </div>
+    </div>
+
+    <div id="alert-overlay" class="hidden">
+        <div class="alert-box">
+            <div class="alert-content">
+                <div class="alert-icon">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                </div>
+                <div class="alert-title" id="alert-title">Confirm Title</div>
+                <div class="alert-message" id="alert-message">Confirm Message</div>
+                <div class="alert-buttons">
+                    <button id="okay-button" class="okay-button">Okay</button>
+                    <button id="cancel-button" class="cancel-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
+	<script src="memu.js"></script>
 
 
 </body>
