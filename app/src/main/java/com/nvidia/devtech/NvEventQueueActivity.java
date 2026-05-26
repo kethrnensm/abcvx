@@ -1528,9 +1528,12 @@ public void surfaceChanged(SurfaceHolder holder, int format, int width, int heig
         mAndroidUI = (FrameLayout) findViewById(R.id.ui_layout);
     }
 
-    // Đưa toàn bộ các hàm chạm vào giao diện (UI/WebView) vào luồng chính (Main Thread)
+    // 1. Lấy trạng thái CEF ngay lập tức tại luồng game để không bị mất dữ liệu
+    final boolean isCefShow = mJavaManager.isShow();
+
+    // 2. Đưa các hàm can thiệp WebView vào luồng UI để không bị crash
     runOnUiThread(() -> {
-        if (mJavaManager.isShow()) {
+        if (isCefShow) {
             if (z2) {
                 mJavaManager.hideBrowserView();
             } else {
@@ -1538,10 +1541,11 @@ public void surfaceChanged(SurfaceHolder holder, int format, int width, int heig
             }
         }
         
-        // Ẩn hoặc hiện mAndroidUI tùy thuộc vào trạng thái pause (z2)
+        // Ẩn/hiện khung UI layout của Android
         mAndroidUI.setVisibility(z2 ? View.GONE : View.VISIBLE);
     });
-	}
+}
+
 
     public void updateHudInfo(int health, int armour, int weaponid, int ammo, int playerid, int money, int wanted) { runOnUiThread(() -> { mHudManager.UpdateHudInfo(health, armour, weaponid, ammo, playerid, money, wanted); }); }
     public void showHud() { runOnUiThread(() -> { mHudManager.ShowHud(); }); }
