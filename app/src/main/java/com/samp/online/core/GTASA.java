@@ -13,10 +13,24 @@ public class GTASA extends WarMedia {
     static String vmVersion;
     private boolean once = false;
 
-    static {
+        static {
         vmVersion = null;
         System.out.println("**** Loading SO's");
 
+        // 1. KÍCH HOẠT AML ĐẦU TIÊN
+        try {
+            System.out.println("**** [Launcher] Đang kích hoạt Android Mod Loader (AML)...");
+            System.loadLibrary("aml"); 
+        } catch (UnsatisfiedLinkError e) {
+            System.out.println("**** [Launcher] Không tìm thấy libaml.so, thử nạp qua tên khác...");
+            try {
+                System.loadLibrary("modloader"); // Phòng trường hợp file .so bị đổi tên thành libmodloader.so
+            } catch (UnsatisfiedLinkError ex) {
+                System.out.println("**** [Launcher] Thất bại! Cả aml và modloader đều không tồn tại.");
+            }
+        }
+
+        // 2. Kích hoạt các thư viện giả lập hệ thống (nếu có)
         try {
             vmVersion = System.getProperty("java.vm.version");
             System.out.println("vmVersion " + vmVersion);
@@ -24,6 +38,7 @@ public class GTASA extends WarMedia {
         } catch (ExceptionInInitializerError | UnsatisfiedLinkError e) {
         }
 
+        // 3. NẠP GAME GỐC VÀ SAMP CLIENT
         System.loadLibrary("GTASA");
         System.loadLibrary("samp");
     }
