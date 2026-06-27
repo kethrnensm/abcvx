@@ -812,42 +812,53 @@ __attribute__((naked)) void PickupPickUp_hook()
 					"pop {pc}\n\t");
 }
 
-extern "C" bool NotifyEnterVehicle(VEHICLE_TYPE *_pVehicle)
+static bool bEnterVehicleSent = false;
+
+extern "C" bool NotifyEnterVehicle(VEHICLE_TYPE* pGtaVehicle)
 {
-    Log("NotifyEnterVehicle");
- 
-    if(!pNetGame)
-    	return false;
- 
-    CVehiclePool *pVehiclePool = pNetGame->GetVehiclePool();
-    CVehicle *pVehicle;
-    VEHICLEID VehicleID = pVehiclePool->FindIDFromGtaPtr(_pVehicle);
-    Log("NotifyEnterVehicle 1");
-    Log("NotifyEnterVehicle VehicleID: %d", VehicleID);
- 
-    if(VehicleID == INVALID_VEHICLE_ID)
-    	return false;
-    Log("NotifyEnterVehicle VehicleID 2: %d", VehicleID);
-
-    if(!pVehiclePool->GetSlotState(VehicleID))
-    	return false;
-
-    Log("NotifyEnterVehicle VehicleID 3: %d", VehicleID);
-
-    pVehicle = pVehiclePool->GetAt(VehicleID);
-
-    Log("NotifyEnterVehicle VehicleModel: %d", pVehicle->m_pVehicle->entity.nModelIndex);
-    if(pVehicle->m_pVehicle->entity.nModelIndex == TRAIN_PASSENGER)
-    	return false;
- 
-    if(pVehicle->m_pVehicle->pDriver && pVehicle->m_pVehicle->pDriver->dwPedType != 0)
+    if (!pNetGame || !pGtaVehicle)
         return false;
- 
-    CLocalPlayer *pLocalPlayer = pNetGame->GetPlayerPool()->GetLocalPlayer();
 
- 
+    CPlayerPool* pPlayerPool = pNetGame->GetPlayerPool();
+    if (!pPlayerPool)
+        return false;
+
+    CLocalPlayer* pLocalPlayer = pPlayerPool->GetLocalPlayer();
+    if (!pLocalPlayer)
+        return false;
+
+    // Nếu đã gửi rồi thì bỏ qua
+    if (bEnterVehicleSent)
+        return false;
+
+    CVehiclePool* pVehiclePool = pNetGame->GetVehiclePool();
+    if (!pVehiclePool)
+        return false;
+
+    VEHICLEID VehicleID = pVehiclePool->FindIDFromGtaPtr(pGtaVehicle);
+
+    if (VehicleID == INVALID_VEHICLE_ID)
+        return false;
+
+    if (!pVehiclePool->GetSlotState(VehicleID))
+        return false;
+
+    CVehicle* pVehicle = pVehiclePool->GetAt(VehicleID);
+    if (!pVehicle || !pVehicle->m_pVehicle)
+        return false;
+
+    // Không xử lý tàu
+    if (pVehicle->m_pVehicle->entity.nModelIndex == TRAIN_PASSENGER)
+        return false;
+
+    // Nếu đã có tài xế khác thì bỏ
+    if (pVehicle->m_pVehicle->pDriver &&
+        pVehicle->m_pVehicle->pDriver->dwPedType != 0)
+        return false;
+
+    bEnterVehicleSent = true;
     pLocalPlayer->SendEnterVehicleNotification(VehicleID, false);
- 
+
     return true;
 }
 
