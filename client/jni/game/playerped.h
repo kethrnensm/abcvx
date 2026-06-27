@@ -77,8 +77,8 @@ public:
 	void SetInterior(uint8_t byteID);
 
 	void PutDirectlyInVehicle(int iVehicleID, int iSeat);
-	void EnterVehicle(int iVehicleID, bool bPassenger);
-	// 0.3.7
+	void EnterVehicle(uint32_t dwVehicleGTAId, bool bPassenger);
+// 0.3.7
 	void ExitCurrentVehicle();
 	// 0.3.7
 	int GetCurrentVehicleID();
