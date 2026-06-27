@@ -899,32 +899,39 @@ void CPlayerPed::PutDirectlyInVehicle(int iVehicleID, int iSeat)
 	}
 }
 
-void CPlayerPed::EnterVehicle(int iVehicleID, bool bPassenger)
+void CPlayerPed::EnterVehicle(uint32_t dwVehicleGTAId, bool bPassenger)
 {
-	if(!m_pPed) return;
-	VEHICLE_TYPE* ThisVehicleType;
-	if((ThisVehicleType = GamePool_Vehicle_GetAt(iVehicleID)) == 0) return;
-	#ifdef _CDEBUG
-	pChatWindow->AddDebugMessage(OBFUSCATE("Call EnterVehicle 1 %d"), ThisVehicleType->entity.nModelIndex);
-#endif
-	if(!GamePool_Ped_GetAt(m_dwGTAId)) return;
-#ifdef _CDEBUG
-	pChatWindow->AddDebugMessage(OBFUSCATE("Call EnterVehicle"));
-#endif
-	if(bPassenger)
+	if (!m_pPed) return;
+
+    CVehicleGTA* pGtaVehicle = GamePool_Vehicle_GetAt(dwVehicleGTAId);
+	if (!pGtaVehicle) return;
+	if (!GamePool_Ped_GetAt(m_dwGTAId)) return;
+
+	bIgnoreNextEntry = true;
+	if(GetCurrentWeapon() == WEAPON_PARACHUTE)
 	{
-		if(ThisVehicleType->entity.nModelIndex == TRAIN_PASSENGER &&
-			(m_pPed == GamePool_FindPlayerPed()))
-		{
-			ScriptCommand(&put_actor_in_car2, m_dwGTAId, iVehicleID, -1);
-		}
-		else
-		{
-			ScriptCommand(&send_actor_to_car_passenger,m_dwGTAId,iVehicleID, 3000, -1);
-		}
+		CWorld::PlayerInFocus = m_bytePlayerNumber;
+		GameStoreLocalPlayerSkills();
+		GameSetRemotePlayerSkills(m_bytePlayerNumber);
+
+		SetArmedWeapon(0,0);
+
+		GameSetLocalPlayerSkills();
+		CWorld::PlayerInFocus = 0;
 	}
-	else
-		ScriptCommand(&send_actor_to_car_driverseat, m_dwGTAId, iVehicleID, 3000);
+
+	if(pGtaVehicle) {
+        if (bPassenger) {
+            if (pGtaVehicle->m_nModelIndex != TRAIN_PASSENGER ||
+                m_pPed != GamePool_FindPlayerPed()) {
+                ScriptCommand(&send_actor_to_car_passenger, m_dwGTAId, dwVehicleGTAId, 3000, -1);
+            } else {
+                ScriptCommand(&put_actor_in_car2, m_dwGTAId, dwVehicleGTAId, -1);
+            }
+        } else {
+            ScriptCommand(&send_actor_to_car_driverseat, m_dwGTAId, dwVehicleGTAId, 3000);
+        }
+    }
 }
 
 // 0.3.7
@@ -954,33 +961,34 @@ void CPlayerPed::ExitCurrentVehicle()
 }
 
 // 0.3.7
+const SCRIPT_COMMAND TASK_LEAVE_ANY_CAR = { 0x0633, "i" };
+void CPlayerPed::ExitCurrentVehicle()
+{
+    FLog("ExitCurrentVehicle");
+
+    if (!m_pPed) return;
+    if(!m_dwGTAId)return;
+    if (!IsValidGamePed(m_pPed) || !GamePool_Ped_GetAt(m_dwGTAId)) {
+        return;
+    }
+
+    //CVehicleGta* ThisVehicleType = 0;
+
+    if(m_pPed->bInVehicle)
+    {
+        ScriptCommand(&TASK_LEAVE_ANY_CAR, m_dwGTAId);
+
+    }
+}
+// 0.3.7
 int CPlayerPed::GetCurrentVehicleID()
 {
-	if(!m_pPed) return 0;
-
-	VEHICLE_TYPE *pVehicle = (VEHICLE_TYPE *)m_pPed->pVehicle;
-	return GamePool_Vehicle_GetIndex(pVehicle);
-}
-
-int CPlayerPed::GetVehicleSeatID()
-{
-	VEHICLE_TYPE *pVehicle;
-
-	if( GetActionTrigger() == ACTION_INCAR && (pVehicle = (VEHICLE_TYPE *)m_pPed->pVehicle) != 0 ) 
-	{
-		if(pVehicle->pDriver == m_pPed) return 0;
-		if(pVehicle->pPassengers[0] == m_pPed) return 1;
-		if(pVehicle->pPassengers[1] == m_pPed) return 2;
-		if(pVehicle->pPassengers[2] == m_pPed) return 3;
-		if(pVehicle->pPassengers[3] == m_pPed) return 4;
-		if(pVehicle->pPassengers[4] == m_pPed) return 5;
-		if(pVehicle->pPassengers[5] == m_pPed) return 6;
-		if(pVehicle->pPassengers[6] == m_pPed) return 7;
+	if(!m_pPed) {
+		return 0;
 	}
 
-	return (-1);
+	return GamePool_Vehicle_GetIndex(m_pPed->pVehicle);
 }
-
 // 0.3.7
 void CPlayerPed::TogglePlayerControllable(bool bToggle)
 {
